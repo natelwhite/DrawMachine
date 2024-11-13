@@ -85,7 +85,7 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int r
   SDL_SetRenderDrawColor(renderer, circleColor[0], circleColor[1], circleColor[2], circleColor[3]);
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
-  for (double i{}; i < 2 * M_PI; i += M_PI / 10) 
+  for (double i{}; i < 2 * M_PI; i += M_PI / 36) 
   {
     x = cos(i) * radius + xPos;
     y = sin(i) * radius + yPos;

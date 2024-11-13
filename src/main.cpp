@@ -7,8 +7,8 @@
 
 const int WIDTH {1200}, HEIGHT {900};
 const int FOURIER_START {0};
-const int CIRCLE_COLOR[4] { 200, 0, 200, 255 };
-const int LINE_COLOR[4] { 200, 200, 200, 255 };
+const int CIRCLE_COLOR[4] { 200, 30, 30, 255 };
+const int LINE_COLOR[4] { 30, 200, 30, 255 };
 
 int main(int argc, char *args[] )
 {
@@ -65,7 +65,7 @@ int main(int argc, char *args[] )
     }
 
     // draw background
-    SDL_SetRenderDrawColor(renderer, 78, 0, 78, 255);
+    SDL_SetRenderDrawColor(renderer, 33, 33, 33, 255);
     SDL_RenderClear(renderer);
 
     // draw fourier + path created from tail of fourier
@@ -74,13 +74,13 @@ int main(int argc, char *args[] )
 
     /**
      * include if the path should be erased when completed
-     *
+     */
     if (series.getTime() == 0)
     {
       path.clear();
     }
 
-     */
+     /**/
 
     SDL_RenderDrawLinesF(renderer, path.data(), path.size());
     series.update();
