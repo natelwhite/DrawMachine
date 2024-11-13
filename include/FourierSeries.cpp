@@ -81,11 +81,15 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
 void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius) {
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
-  for (double i{}; i < 2 * M_PI; i += M_PI / (radius)) {
-    x = cos(i) * radius + pos.x;
-    y = sin(i) * radius + pos.y;
-    SDL_RenderDrawPointF(renderer, x, y);
+  std::vector<SDL_FPoint> points;
+  for (double i{}; i < 2 * M_PI; i += M_PI / (radius * 2.0f)) {
+    SDL_FPoint point = {
+      static_cast<float>(cos(i)) * radius + pos.x,
+      static_cast<float>(sin(i)) * radius + pos.y
+    };
+    points.emplace_back(point);
   }
+  SDL_RenderDrawLinesF(renderer, points.data(), points.size());
 }
 
 // get tail of x & y axis
