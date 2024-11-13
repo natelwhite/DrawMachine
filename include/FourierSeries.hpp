@@ -21,11 +21,10 @@ class FourierSeries {
     void setCircleColor(const SDL_Color &color);
     void setLineColor(const SDL_Color &color);
   private:
-    void drawCircle(SDL_Renderer*, int, int, int);
-    std::vector<Circle> m_xCircles;
-    std::vector<Circle> m_yCircles;
+    void drawCircle(SDL_Renderer*, const float &xPos, const float &yPos, const float &radius);
+    std::vector<Circle> m_xCircles, m_yCircles;
     float m_lastX, m_lastY, m_size;
     int m_height;
     SDL_Color m_circleColor {255, 255, 255, 255}, m_lineColor {255, 0, 0, 255};
-    float time { };
+    float m_time { };
 };

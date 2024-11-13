@@ -7,8 +7,8 @@
 
 const int WIDTH {1200}, HEIGHT {900};
 const int FOURIER_START {0};
-const int CIRCLE_COLOR[4] { 200, 30, 30, 255 };
-const int LINE_COLOR[4] { 30, 200, 30, 255 };
+const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
+const SDL_Color LINE_COLOR { 30, 200, 30, 255 };
 
 int main(int argc, char *args[] )
 {
@@ -48,8 +48,8 @@ int main(int argc, char *args[] )
   }
 
   FourierSeries series {x_path, y_path, HEIGHT};
-  series.setLineColor(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3]);
-  series.setCircleColor(CIRCLE_COLOR[0], CIRCLE_COLOR[1], CIRCLE_COLOR[2], CIRCLE_COLOR[3]);
+  series.setLineColor(LINE_COLOR);
+  series.setCircleColor(CIRCLE_COLOR);
 
   while (!quit) {
     // event handling
