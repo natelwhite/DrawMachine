@@ -13,7 +13,7 @@ struct Circle {
 
 class FourierSeries {
   public:
-    FourierSeries(std::vector<float> x_path, std::vector<float> y_path, int t_height);
+    FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_height);
     void draw(SDL_Renderer*);
     void update();
     float getY();

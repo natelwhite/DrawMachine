@@ -1,5 +1,5 @@
 #include "FourierSeries.hpp"
-FourierSeries::FourierSeries(std::vector<float> x_path, std::vector<float> y_path, int t_height)
+FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_height)
   : m_height(t_height) {
   // break down path coordinates into vectors (dft)
   // one 'fourier system' for each axis
@@ -45,7 +45,7 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   // vectors that draw x values
   float xAxis[2] {0, 0};
   float yAxis[2] {0, 0};
-  yAxis[1] = m_height / 2.0;
+  yAxis[1] = m_height / 2.0f;
   for (int i{}; i < m_size; i++) {
     float prevX[2] {xAxis[0], xAxis[1]}; // coordinate pair for xVector[i]
     float prevY[2] {yAxis[0], yAxis[1]}; // coordinate pair for yVector[i]
@@ -81,8 +81,7 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int r
   SDL_SetRenderDrawColor(renderer, circleColor[0], circleColor[1], circleColor[2], circleColor[3]);
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
-  for (double i{}; i < 2 * M_PI; i += M_PI / 36) 
-  {
+  for (double i{}; i < 2 * M_PI; i += M_PI / 36) {
     x = cos(i) * radius + xPos;
     y = sin(i) * radius + yPos;
     SDL_RenderDrawPointF(renderer, x, y);
