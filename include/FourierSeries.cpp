@@ -46,8 +46,7 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   float xAxis[2] {0, 0};
   float yAxis[2] {0, 0};
   yAxis[1] = m_height / 2.0;
-  for (int i{}; i < size; i++)
-  {
+  for (int i{}; i < size; i++) {
     float prevX[2] {xAxis[0], xAxis[1]}; // coordinate pair for xVector[i]
     float prevY[2] {yAxis[0], yAxis[1]}; // coordinate pair for yVector[i]
     xAxis[0] += cos(xVectors[i].frequency * time + xVectors[i].phase) * xVectors[i].amplitude; // x = cos(frequency over time plus the initial angle) * strength of vector
@@ -102,7 +101,6 @@ float FourierSeries::getX() {
 
 // returns 0 when the series repeats
 float FourierSeries::getTime() {
-  std::cout << time << std::endl;
   return time;
 }
 

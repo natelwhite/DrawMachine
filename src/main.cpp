@@ -31,8 +31,7 @@ int main(int argc, char *args[] )
   if (source.is_open()) {
     int i{};
     std::string line;
-    while (std::getline(source, line))
-    {
+    while (std::getline(source, line)) {
       int start = line.find(':') + 2;
       int end = line.find(',');
       std::string x = line.substr(start, end - start);
@@ -52,6 +51,7 @@ int main(int argc, char *args[] )
   FourierSeries series {xArr.data(), yArr.data(), size, HEIGHT};
   series.setLineColor(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3]);
   series.setCircleColor(CIRCLE_COLOR[0], CIRCLE_COLOR[1], CIRCLE_COLOR[2], CIRCLE_COLOR[3]);
+
   while (!quit) {
     // event handling
     while (SDL_PollEvent(&e) != 0) {
@@ -67,15 +67,6 @@ int main(int argc, char *args[] )
     // draw fourier + path created from tail of fourier
     series.draw(renderer);
     path.push_back(SDL_FPoint {series.getX(), series.getY()});
-
-    /**
-     * include if the path should be erased when completed
-     */
-    if (series.getTime() == 0) {
-      path.clear();
-    }
-
-     /**/
 
     SDL_RenderDrawLinesF(renderer, path.data(), path.size());
     series.update();
