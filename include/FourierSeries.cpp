@@ -44,8 +44,7 @@ FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector
 void FourierSeries::draw(SDL_Renderer* renderer) {
   // vectors that draw x values
   float xAxis[2] {0, 0};
-  float yAxis[2] {0, 0};
-  yAxis[1] = m_height / 2.0f;
+  float yAxis[2] {0, static_cast<float>(m_height)};
   for (int i{}; i < m_size; i++) {
     float prevX[2] {xAxis[0], xAxis[1]}; // coordinate pair for xVector[i]
     float prevY[2] {yAxis[0], yAxis[1]}; // coordinate pair for yVector[i]
@@ -72,13 +71,13 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   int xVectorLastY = xAxis[1];
   int yVectorLastX = yAxis[0];
 
-  SDL_SetRenderDrawColor(renderer, lineColor[0], lineColor[1], lineColor[2], lineColor[3]);
+  SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
   SDL_RenderDrawLine(renderer, m_lastX, xVectorLastY, m_lastX, m_lastY);
   SDL_RenderDrawLine(renderer, yVectorLastX, m_lastY, m_lastX, m_lastY);
 }
 
 void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int radius) {
-  SDL_SetRenderDrawColor(renderer, circleColor[0], circleColor[1], circleColor[2], circleColor[3]);
+  SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
   for (double i{}; i < 2 * M_PI; i += M_PI / 36) {
@@ -88,15 +87,10 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int r
   }
 }
 
-// get x-axis tail (y-coordinate of path)
-float FourierSeries::getY() { 
-  return m_lastY;
+// get tail of x & y axis
+SDL_FPoint FourierSeries::getPoint() {
+  return SDL_FPoint {m_lastY, m_lastX};
 }
-
-// get y-axis tail (x-coordinate of path)
-float FourierSeries::getX() {
-  return m_lastX;
-} 
 
 // returns 0 when the series repeats
 float FourierSeries::getTime() {
@@ -108,16 +102,10 @@ void FourierSeries::update() {
   (time <= 2 * M_PI) ? (time += 2 * M_PI / m_size) : (time = 0);
 }
 
-void FourierSeries::setCircleColor(const int &r, const int &g, const int &b, const int &a) {
-  circleColor[0] = r;
-  circleColor[1] = g;
-  circleColor[2] = b;  
-  circleColor[3] = a;
+void FourierSeries::setCircleColor(const SDL_Color &color) {
+  m_circleColor = color;
 }
 
-void FourierSeries::setLineColor(const int &r, const int &g, const int &b, const int &a) { 
-  lineColor[0] = r;
-  lineColor[1] = g;
-  lineColor[2] = b;  
-  lineColor[3] = a; 
+void FourierSeries::setLineColor(const SDL_Color &color) { 
+  m_lineColor = color;
 }

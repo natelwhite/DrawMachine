@@ -65,7 +65,7 @@ int main(int argc, char *args[] )
 
     // draw fourier + path created from tail of fourier
     series.draw(renderer);
-    path.push_back(SDL_FPoint {series.getX(), series.getY()});
+    path.emplace_back(series.getPoint());
 
     SDL_RenderDrawLinesF(renderer, path.data(), path.size());
     series.update();
