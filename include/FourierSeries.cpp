@@ -9,15 +9,16 @@ FourierSeries::FourierSeries(std::vector<float> x_path, std::vector<float> y_pat
   }
 
   m_size = x_path.size();
+  m_xCircles.resize(m_size);
+  m_yCircles.resize(m_size);
 
-  for (int i{}; i < m_size; i++)
-  {
+  for (int i = 0; i < m_size; i++) {
     double xRe{}, xIm{}; // real, imaginary | complex num | represents coordinate point
     double yRe{}, yIm{};
     double tau {2 * M_PI}; // circumfrence to radius ratio
 
     // discrete integral over x values to get coordinate points on complex plane
-    for (int j{}; j < m_size; j++) {
+    for (int j = 0; j < m_size; j++) {
       const double phi {tau * i * j / m_size}; // phase
       xRe += x_path.at(j) * cos(phi); // real x value      | terminal x val of vector
       xIm -= x_path.at(j) * sin(phi); // imaginary y value | terminal y val of vector
@@ -28,15 +29,15 @@ FourierSeries::FourierSeries(std::vector<float> x_path, std::vector<float> y_pat
     xIm /= m_size;
     yRe /= m_size;
     yIm /= m_size;
-    m_xCircles[i].frequency = i; // num of rotations per unit time
-    m_xCircles[i].amplitude = sqrt(xRe * xRe + xIm * xIm); // a^2 + b^2 = c^2 | c^2 = length/amplitude of circle
+    m_xCircles.at(i).frequency = i; // num of rotations per unit time
+    m_xCircles.at(i).amplitude = sqrt(xRe * xRe + xIm * xIm); // a^2 + b^2 = c^2 | c^2 = length/amplitude of circle
     // ^ this is also the radius of the circle formed around the circle
-    m_xCircles[i].phase = atan2(xIm, xRe); // starting rotation for circle
+    m_xCircles.at(i).phase = atan2(xIm, xRe); // starting rotation for circle
 
-    m_yCircles[i].frequency = i;
-    m_yCircles[i].amplitude = sqrt(yRe * yRe + yIm * yIm);
-    m_yCircles[i].phase = atan2(yIm, yRe);
-    m_yCircles[i].phase -= M_PI / 2; // turn yVectors 90 deg
+    m_yCircles.at(i).frequency = i;
+    m_yCircles.at(i).amplitude = sqrt(yRe * yRe + yIm * yIm);
+    m_yCircles.at(i).phase = atan2(yIm, yRe);
+    m_yCircles.at(i).phase -= M_PI / 2; // turn yVectors 90 deg
   }
 }
 

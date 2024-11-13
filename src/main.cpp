@@ -17,8 +17,7 @@ int main(int argc, char *args[] )
   SDL_Init(SDL_INIT_EVERYTHING);
   SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &window, &renderer);
 
-  std::vector<double> xArr; // x vals
-  std::vector<double> yArr; // y vals
+  std::vector<float> x_path, y_path; // x & y coordinates
   std::vector<SDL_FPoint> path; // the path that has been drawn so far
 
   // build arr of x vals and y vals seperately
@@ -38,8 +37,8 @@ int main(int argc, char *args[] )
       start = end + 2;
       end = line.length() - 1;
       std::string y = line.substr(start, end - start);
-      xArr.push_back(std::stod(x));
-      yArr.push_back(std::stod(y));
+      x_path.emplace_back(std::stof(x));
+      y_path.emplace_back(std::stof(y));
       i++;
     }
     size = i; // number of points in source
@@ -48,7 +47,7 @@ int main(int argc, char *args[] )
     quit = true;
   }
 
-  FourierSeries series {xArr.data(), yArr.data(), size, HEIGHT};
+  FourierSeries series {x_path, y_path, HEIGHT};
   series.setLineColor(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3]);
   series.setCircleColor(CIRCLE_COLOR[0], CIRCLE_COLOR[1], CIRCLE_COLOR[2], CIRCLE_COLOR[3]);
 
