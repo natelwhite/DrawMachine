@@ -28,8 +28,7 @@ int main(int argc, char *args[] )
 
   // store data found in source
   int size {};
-  if (source.is_open())
-  {
+  if (source.is_open()) {
     int i{};
     std::string line;
     while (std::getline(source, line))
@@ -45,9 +44,7 @@ int main(int argc, char *args[] )
       i++;
     }
     size = i; // number of points in source
-  }
-  else
-  {
+  } else {
     std::cout << "could not open source.txt" << std::endl;
     quit = true;
   }
@@ -55,11 +52,10 @@ int main(int argc, char *args[] )
   FourierSeries series {xArr.data(), yArr.data(), size, HEIGHT};
   series.setLineColor(LINE_COLOR[0], LINE_COLOR[1], LINE_COLOR[2], LINE_COLOR[3]);
   series.setCircleColor(CIRCLE_COLOR[0], CIRCLE_COLOR[1], CIRCLE_COLOR[2], CIRCLE_COLOR[3]);
-  while (!quit){
+  while (!quit) {
     // event handling
-    while (SDL_PollEvent(&e) != 0){
-      if (e.type == SDL_QUIT || e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
-      {
+    while (SDL_PollEvent(&e) != 0) {
+      if (e.type == SDL_QUIT || e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE) {
         quit = true;
       }
     }
@@ -75,8 +71,7 @@ int main(int argc, char *args[] )
     /**
      * include if the path should be erased when completed
      */
-    if (series.getTime() == 0)
-    {
+    if (series.getTime() == 0) {
       path.clear();
     }
 
