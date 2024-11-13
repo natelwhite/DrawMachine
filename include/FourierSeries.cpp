@@ -43,46 +43,51 @@ FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector
 
 void FourierSeries::draw(SDL_Renderer* renderer) {
   // vectors that draw x values
-  float xAxis[2] {0, 0};
-  float yAxis[2] {0, static_cast<float>(m_height)};
+  SDL_FPoint x_point, y_point;
+  y_point.y = m_height;
+  SDL_FPoint prev_x, prev_y;
   for (int i{}; i < m_size; i++) {
-    float prevX[2] {xAxis[0], xAxis[1]}; // coordinate pair for xVector[i]
-    float prevY[2] {yAxis[0], yAxis[1]}; // coordinate pair for yVector[i]
-    xAxis[0] += cos(m_xCircles.at(i).frequency * m_time + m_xCircles.at(i).phase) * m_xCircles.at(i).amplitude; // x = cos(frequency over time plus the initial angle) * strength of vector
-    xAxis[1] += sin(m_xCircles.at(i).frequency * m_time + m_xCircles.at(i).phase) * m_xCircles.at(i).amplitude; // same but y, so sin()
-    yAxis[0] += cos(m_yCircles.at(i).frequency * m_time + m_yCircles.at(i).phase) * m_yCircles.at(i).amplitude;
-    yAxis[1] += sin(m_yCircles.at(i).frequency * m_time + m_yCircles.at(i).phase) * m_yCircles.at(i).amplitude;
-    SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a); // draw lines in red
+    SDL_FPoint next_x = m_xCircles.at(i).getPoint(m_time);
+    prev_x = x_point;
+    x_point.x += next_x.x;
+    x_point.y += next_x.y;
+
+    SDL_FPoint next_y = m_yCircles.at(i).getPoint(m_time);
+    prev_y = y_point;
+    y_point.x += next_y.x;
+    y_point.y += next_y.y;
 
     // draw a line from one vector to the next
-    SDL_RenderDrawLine(renderer, prevX[0], prevX[1], xAxis[0], xAxis[1]);
-    SDL_RenderDrawLine(renderer, prevY[0], prevY[1], yAxis[0], yAxis[1]);
+    SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a); // draw lines in red
+    SDL_RenderDrawLineF(renderer, prev_x.x, prev_x.y, x_point.x, x_point.y);
+    SDL_RenderDrawLineF(renderer, prev_y.x, prev_y.y, y_point.x, y_point.y);
+
 
     // draw circle to represent vector
-    drawCircle(renderer, prevX[0], prevX[1], m_xCircles.at(i).amplitude);
-    drawCircle(renderer, prevY[0], prevY[1], m_yCircles.at(i).amplitude);
+    SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
+    drawCircle(renderer, prev_x, m_xCircles.at(i).amplitude);
+    drawCircle(renderer, prev_y, m_yCircles.at(i).amplitude);
   }
 
-  // give access to vector result
-  m_lastX = xAxis[0];
-  m_lastY = yAxis[1];
+  // update last coordinate
+  m_lastX = x_point.x;
+  m_lastY = y_point.y;
 
   // draw a line from the system to the result
-  int xVectorLastY = xAxis[1];
-  int yVectorLastX = yAxis[0];
+  int xVectorLastY = prev_x.y;
+  int yVectorLastX = prev_y.x;
 
   SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
   SDL_RenderDrawLine(renderer, m_lastX, xVectorLastY, m_lastX, m_lastY);
   SDL_RenderDrawLine(renderer, yVectorLastX, m_lastY, m_lastX, m_lastY);
 }
 
-void FourierSeries::drawCircle(SDL_Renderer* renderer, const float &xPos, const float &yPos, const float &radius) {
-  SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
+void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius) {
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
   for (double i{}; i < 2 * M_PI; i += M_PI / (radius)) {
-    x = cos(i) * radius + xPos;
-    y = sin(i) * radius + yPos;
+    x = cos(i) * radius + pos.x;
+    y = sin(i) * radius + pos.y;
     SDL_RenderDrawPointF(renderer, x, y);
   }
 }

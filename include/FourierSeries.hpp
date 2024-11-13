@@ -6,9 +6,15 @@
 #include <vector>
 
 struct Circle {
-  double frequency;
-  double amplitude;
-  double phase;
+  float frequency;
+  float amplitude;
+  float phase;
+  SDL_FPoint getPoint(const float &time) {
+    SDL_FPoint result;
+    result.x = cos(frequency * time + phase) * amplitude;
+    result.y = sin(frequency * time + phase) * amplitude;
+    return result;
+  }
 };
 
 class FourierSeries {
@@ -21,10 +27,11 @@ class FourierSeries {
     void setCircleColor(const SDL_Color &color);
     void setLineColor(const SDL_Color &color);
   private:
-    void drawCircle(SDL_Renderer*, const float &xPos, const float &yPos, const float &radius);
+    void drawCircle(SDL_Renderer*, const SDL_FPoint &pos, const float &radius);
     std::vector<Circle> m_xCircles, m_yCircles;
     float m_lastX, m_lastY, m_size;
     int m_height;
     SDL_Color m_circleColor {255, 255, 255, 255}, m_lineColor {255, 0, 0, 255};
     float m_time { };
 };
+
