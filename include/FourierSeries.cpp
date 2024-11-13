@@ -1,6 +1,5 @@
 #include "FourierSeries.hpp"
-FourierSeries::FourierSeries(double* xArr, double* yArr, int count, int t_height)
-{
+FourierSeries::FourierSeries(double* xArr, double* yArr, int count, int t_height) {
   m_height = t_height;
 
   // size of array | num of vectors to find for each arr
@@ -42,8 +41,7 @@ FourierSeries::FourierSeries(double* xArr, double* yArr, int count, int t_height
   }
 }
 
-void FourierSeries::draw(SDL_Renderer* renderer)
-{
+void FourierSeries::draw(SDL_Renderer* renderer) {
   // vectors that draw x values
   float xAxis[2] {0, 0};
   float yAxis[2] {0, 0};
@@ -80,8 +78,7 @@ void FourierSeries::draw(SDL_Renderer* renderer)
   SDL_RenderDrawLine(renderer, yVectorLastX, lastY, lastX, lastY);
 }
 
-void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int radius)
-{
+void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int radius) {
   SDL_SetRenderDrawColor(renderer, circleColor[0], circleColor[1], circleColor[2], circleColor[3]);
   float x{}, y{};
   // calculate coordinate of tangent points along the circumfrence
@@ -94,40 +91,34 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int r
 }
 
 // get x-axis tail (y-coordinate of path)
-float FourierSeries::getY()
-{ 
+float FourierSeries::getY() { 
   return lastY;
 }
 
 // get y-axis tail (x-coordinate of path)
-float FourierSeries::getX()
-{
+float FourierSeries::getX() {
   return lastX;
 } 
 
 // returns 0 when the series repeats
-float FourierSeries::getTime()
-{
+float FourierSeries::getTime() {
   std::cout << time << std::endl;
   return time;
 }
 
 // move vectors to next position
-void FourierSeries::update()
-{
+void FourierSeries::update() {
   (time <= 2 * M_PI) ? (time += 2 * M_PI / size) : (time = 0);
 }
 
-void FourierSeries::setCircleColor(const int &r, const int &g, const int &b, const int &a)
-{
+void FourierSeries::setCircleColor(const int &r, const int &g, const int &b, const int &a) {
   circleColor[0] = r;
   circleColor[1] = g;
   circleColor[2] = b;  
   circleColor[3] = a;
 }
 
-void FourierSeries::setLineColor(const int &r, const int &g, const int &b, const int &a)
-{ 
+void FourierSeries::setLineColor(const int &r, const int &g, const int &b, const int &a) { 
   lineColor[0] = r;
   lineColor[1] = g;
   lineColor[2] = b;  
