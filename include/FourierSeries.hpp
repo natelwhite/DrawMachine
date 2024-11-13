@@ -29,7 +29,8 @@ class FourierSeries {
   private:
     void drawCircle(SDL_Renderer*, const SDL_FPoint &pos, const float &radius);
     std::vector<Circle> m_xCircles, m_yCircles;
-    float m_lastX, m_lastY, m_size;
+    SDL_FPoint m_result {0.0f, 0.0f};
+    float m_size;
     int m_height;
     SDL_Color m_circleColor {255, 255, 255, 255}, m_lineColor {255, 0, 0, 255};
     float m_time { };

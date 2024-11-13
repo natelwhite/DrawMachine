@@ -57,29 +57,25 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
     y_point.x += next_y.x;
     y_point.y += next_y.y;
 
-    // draw a line from one vector to the next
-    SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a); // draw lines in red
+    // draw a line from one circle to the next
+    SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
     SDL_RenderDrawLineF(renderer, prev_x.x, prev_x.y, x_point.x, x_point.y);
     SDL_RenderDrawLineF(renderer, prev_y.x, prev_y.y, y_point.x, y_point.y);
 
 
-    // draw circle to represent vector
+    // draw circle
     SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
     drawCircle(renderer, prev_x, m_xCircles.at(i).amplitude);
     drawCircle(renderer, prev_y, m_yCircles.at(i).amplitude);
   }
 
   // update last coordinate
-  m_lastX = x_point.x;
-  m_lastY = y_point.y;
+  m_result = {x_point.x, y_point.y};
 
   // draw a line from the system to the result
-  int xVectorLastY = prev_x.y;
-  int yVectorLastX = prev_y.x;
-
   SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
-  SDL_RenderDrawLine(renderer, m_lastX, xVectorLastY, m_lastX, m_lastY);
-  SDL_RenderDrawLine(renderer, yVectorLastX, m_lastY, m_lastX, m_lastY);
+  SDL_RenderDrawLine(renderer, m_result.x, x_point.y, m_result.x, m_result.y);
+  SDL_RenderDrawLine(renderer, y_point.x, m_result.y, m_result.x, m_result.y);
 }
 
 void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius) {
@@ -94,7 +90,7 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, co
 
 // get tail of x & y axis
 SDL_FPoint FourierSeries::getPoint() {
-  return SDL_FPoint {m_lastX, m_lastY};
+  return m_result;
 }
 
 // returns 0 when the series repeats
