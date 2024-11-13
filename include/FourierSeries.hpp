@@ -3,8 +3,9 @@
 #include <cmath>
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <vector>
 
-struct vector {
+struct Circle {
   double frequency;
   double amplitude;
   double phase;
@@ -12,7 +13,7 @@ struct vector {
 
 class FourierSeries {
   public:
-    FourierSeries(double*, double*, int, int);
+    FourierSeries(std::vector<float> x_path, std::vector<float> y_path, int t_height);
     void draw(SDL_Renderer*);
     void update();
     float getY();
@@ -22,11 +23,10 @@ class FourierSeries {
     void setLineColor(const int&, const int&, const int&, const int&);
   private:
     void drawCircle(SDL_Renderer*, int, int, int);
-    vector* xVectors;
-    vector* yVectors;
-    float lastX{}, lastY{};
-    float size;
+    std::vector<Circle> m_xCircles;
+    std::vector<Circle> m_yCircles;
+    float m_lastX, m_lastY, m_size;
     int m_height;
     int circleColor[4] {255, 255, 255, 255}, lineColor[4] {255, 0, 0, 255};
-    float time {};
+    float time { };
 };

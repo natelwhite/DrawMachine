@@ -1,43 +1,42 @@
 #include "FourierSeries.hpp"
-FourierSeries::FourierSeries(double* xArr, double* yArr, int count, int t_height) {
-  m_height = t_height;
-
-  // size of array | num of vectors to find for each arr
-  size = count; 
-
-  // allocate memory for 2 arrs of vectors. arr[0] will be the fundamental frequency. arr[count] will be the output
-  xVectors = new vector[count];
-  yVectors = new vector[count];
-
+FourierSeries::FourierSeries(std::vector<float> x_path, std::vector<float> y_path, int t_height)
+  : m_height(t_height) {
   // break down path coordinates into vectors (dft)
   // one 'fourier system' for each axis
-  for (int i{}; i < count; i++)
+  if (x_path.size() != y_path.size()) {
+    std::cout << "Paths must be exactly the same size" << std::endl;
+    return;
+  }
+
+  m_size = x_path.size();
+
+  for (int i{}; i < m_size; i++)
   {
     double xRe{}, xIm{}; // real, imaginary | complex num | represents coordinate point
     double yRe{}, yIm{};
     double tau {2 * M_PI}; // circumfrence to radius ratio
 
     // discrete integral over x values to get coordinate points on complex plane
-    for (int j{}; j < count; j++)
-    {
-      const double phi {tau * i * j / size}; // phase
-      xRe += xArr[j] * cos(phi); // real x value      | terminal x val of vector
-      xIm -= xArr[j] * sin(phi); // imaginary y value | terminal y val of vector
-      yRe += yArr[j] * cos(phi);
-      yIm -= yArr[j] * sin(phi);
+    for (int j{}; j < m_size; j++) {
+      const double phi {tau * i * j / m_size}; // phase
+      xRe += x_path.at(j) * cos(phi); // real x value      | terminal x val of vector
+      xIm -= x_path.at(j) * sin(phi); // imaginary y value | terminal y val of vector
+      yRe += y_path.at(j) * cos(phi);
+      yIm -= y_path.at(j) * sin(phi);
     }
-    xRe /= size; // average out all values
-    xIm /= size;
-    yRe /= size;
-    yIm /= size;
-    xVectors[i].frequency = i; // num of rotations per unit time
-    xVectors[i].amplitude = sqrt(xRe * xRe + xIm * xIm); // a^2 + b^2 = c^2 | c^2 = length/amplitude of vector
-    // ^ this is also the radius of the circle formed around the vector
-    xVectors[i].phase = atan2(xIm, xRe); // starting rotation for vector
-    yVectors[i].frequency = i;
-    yVectors[i].amplitude = sqrt(yRe * yRe + yIm * yIm);
-    yVectors[i].phase = atan2(yIm, yRe);
-    yVectors[i].phase -= M_PI / 2; // turn yVectors 90 deg
+    xRe /= m_size; // average out all values
+    xIm /= m_size;
+    yRe /= m_size;
+    yIm /= m_size;
+    m_xCircles[i].frequency = i; // num of rotations per unit time
+    m_xCircles[i].amplitude = sqrt(xRe * xRe + xIm * xIm); // a^2 + b^2 = c^2 | c^2 = length/amplitude of circle
+    // ^ this is also the radius of the circle formed around the circle
+    m_xCircles[i].phase = atan2(xIm, xRe); // starting rotation for circle
+
+    m_yCircles[i].frequency = i;
+    m_yCircles[i].amplitude = sqrt(yRe * yRe + yIm * yIm);
+    m_yCircles[i].phase = atan2(yIm, yRe);
+    m_yCircles[i].phase -= M_PI / 2; // turn yVectors 90 deg
   }
 }
 
@@ -46,13 +45,13 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   float xAxis[2] {0, 0};
   float yAxis[2] {0, 0};
   yAxis[1] = m_height / 2.0;
-  for (int i{}; i < size; i++) {
+  for (int i{}; i < m_size; i++) {
     float prevX[2] {xAxis[0], xAxis[1]}; // coordinate pair for xVector[i]
     float prevY[2] {yAxis[0], yAxis[1]}; // coordinate pair for yVector[i]
-    xAxis[0] += cos(xVectors[i].frequency * time + xVectors[i].phase) * xVectors[i].amplitude; // x = cos(frequency over time plus the initial angle) * strength of vector
-    xAxis[1] += sin(xVectors[i].frequency * time + xVectors[i].phase) * xVectors[i].amplitude; // same but y, so sin()
-    yAxis[0] += cos(yVectors[i].frequency * time + yVectors[i].phase) * yVectors[i].amplitude;
-    yAxis[1] += sin(yVectors[i].frequency * time + yVectors[i].phase) * yVectors[i].amplitude;
+    xAxis[0] += cos(m_xCircles.at(i).frequency * time + m_xCircles.at(i).phase) * m_xCircles.at(i).amplitude; // x = cos(frequency over time plus the initial angle) * strength of vector
+    xAxis[1] += sin(m_xCircles.at(i).frequency * time + m_xCircles.at(i).phase) * m_xCircles.at(i).amplitude; // same but y, so sin()
+    yAxis[0] += cos(m_yCircles.at(i).frequency * time + m_yCircles.at(i).phase) * m_yCircles.at(i).amplitude;
+    yAxis[1] += sin(m_yCircles.at(i).frequency * time + m_yCircles.at(i).phase) * m_yCircles.at(i).amplitude;
     SDL_SetRenderDrawColor(renderer, lineColor[0], lineColor[1], lineColor[2], lineColor[3]); // draw lines in red
 
     // draw a line from one vector to the next
@@ -60,21 +59,21 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
     SDL_RenderDrawLine(renderer, prevY[0], prevY[1], yAxis[0], yAxis[1]);
 
     // draw circle to represent vector
-    drawCircle(renderer, prevX[0], prevX[1], xVectors[i].amplitude);
-    drawCircle(renderer, prevY[0], prevY[1], yVectors[i].amplitude);
+    drawCircle(renderer, prevX[0], prevX[1], m_xCircles.at(i).amplitude);
+    drawCircle(renderer, prevY[0], prevY[1], m_yCircles.at(i).amplitude);
   }
 
   // give access to vector result
-  lastX = xAxis[0];
-  lastY = yAxis[1];
+  m_lastX = xAxis[0];
+  m_lastY = yAxis[1];
 
   // draw a line from the system to the result
   int xVectorLastY = xAxis[1];
   int yVectorLastX = yAxis[0];
 
   SDL_SetRenderDrawColor(renderer, lineColor[0], lineColor[1], lineColor[2], lineColor[3]);
-  SDL_RenderDrawLine(renderer, lastX, xVectorLastY, lastX, lastY);
-  SDL_RenderDrawLine(renderer, yVectorLastX, lastY, lastX, lastY);
+  SDL_RenderDrawLine(renderer, m_lastX, xVectorLastY, m_lastX, m_lastY);
+  SDL_RenderDrawLine(renderer, yVectorLastX, m_lastY, m_lastX, m_lastY);
 }
 
 void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int radius) {
@@ -91,12 +90,12 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, int xPos, int yPos, int r
 
 // get x-axis tail (y-coordinate of path)
 float FourierSeries::getY() { 
-  return lastY;
+  return m_lastY;
 }
 
 // get y-axis tail (x-coordinate of path)
 float FourierSeries::getX() {
-  return lastX;
+  return m_lastX;
 } 
 
 // returns 0 when the series repeats
@@ -106,7 +105,7 @@ float FourierSeries::getTime() {
 
 // move vectors to next position
 void FourierSeries::update() {
-  (time <= 2 * M_PI) ? (time += 2 * M_PI / size) : (time = 0);
+  (time <= 2 * M_PI) ? (time += 2 * M_PI / m_size) : (time = 0);
 }
 
 void FourierSeries::setCircleColor(const int &r, const int &g, const int &b, const int &a) {
