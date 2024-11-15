@@ -1,6 +1,6 @@
 #include "FourierSeries.hpp"
-FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_height)
-  : m_height(t_height) {
+FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_width, const int &t_height)
+  : m_width(t_width), m_height(t_height) {
   // break down path coordinates into vectors (dft)
   // one 'fourier system' for each axis
   if (x_path.size() != y_path.size()) {
@@ -43,8 +43,7 @@ FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector
 
 void FourierSeries::draw(SDL_Renderer* renderer) {
   // vectors that draw x values
-  SDL_FPoint x_point, y_point;
-  y_point.y = m_height;
+  SDL_FPoint x_point {static_cast<float>(m_width) / 2.0f, 50}, y_point {50, static_cast<float>(m_height) * 0.66f};
   SDL_FPoint prev_x, prev_y;
   for (int i{}; i < m_size; i++) {
     SDL_FPoint next_x = m_xCircles.at(i).getPoint(m_time);
@@ -62,11 +61,10 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
     SDL_RenderDrawLineF(renderer, prev_x.x, prev_x.y, x_point.x, x_point.y);
     SDL_RenderDrawLineF(renderer, prev_y.x, prev_y.y, y_point.x, y_point.y);
 
-
     // draw circle
     SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
-    drawCircle(renderer, prev_x, m_xCircles.at(i).amplitude);
-    drawCircle(renderer, prev_y, m_yCircles.at(i).amplitude);
+    drawCircle(renderer, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
+    drawCircle(renderer, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
   }
 
   // update last coordinate
@@ -78,17 +76,18 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   SDL_RenderDrawLine(renderer, y_point.x, m_result.y, m_result.x, m_result.y);
 }
 
-void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius) {
-  float x{}, y{};
+void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius, const float &phase) {
   // calculate coordinate of tangent points along the circumfrence
   std::vector<SDL_FPoint> points;
-  for (double i{}; i < 2 * M_PI; i += M_PI / (radius * 2.0f)) {
+  for (double i{}; i < 2 * M_PI; i += 2 * M_PI / 3.0f) {
     SDL_FPoint point = {
-      static_cast<float>(cos(i)) * radius + pos.x,
-      static_cast<float>(sin(i)) * radius + pos.y
+      static_cast<float>(cos(i + phase)) * radius + pos.x,
+      static_cast<float>(sin(i + phase)) * radius + pos.y
     };
     points.emplace_back(point);
   }
+  // duplicate first point to the end of the list to complete shape
+  points.emplace_back(points.at(0));
   SDL_RenderDrawLinesF(renderer, points.data(), points.size());
 }
 

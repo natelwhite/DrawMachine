@@ -14,7 +14,16 @@ int main(int argc, char *args[] )
 {
   SDL_Window* window = nullptr;
   SDL_Renderer* renderer = nullptr;
-  SDL_Init(SDL_INIT_EVERYTHING);
+  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    printf("Error: %s\n", SDL_GetError());
+  }
+
+  // enable native IME
+#ifdef SDL_HINT_IME_SHOW_UI
+  SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
+#endif
+  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
+
   SDL_CreateWindowAndRenderer(WIDTH, HEIGHT, 0, &window, &renderer);
 
   std::vector<float> x_path, y_path; // x & y coordinates
@@ -47,7 +56,7 @@ int main(int argc, char *args[] )
     quit = true;
   }
 
-  FourierSeries series {x_path, y_path, HEIGHT};
+  FourierSeries series {x_path, y_path, HEIGHT, WIDTH};
   series.setLineColor(LINE_COLOR);
   series.setCircleColor(CIRCLE_COLOR);
 
@@ -70,6 +79,7 @@ int main(int argc, char *args[] )
     SDL_RenderDrawLinesF(renderer, path.data(), path.size());
     series.update();
     SDL_RenderPresent(renderer);
+    SDL_Delay(50);
   }
   return 0;
 }
