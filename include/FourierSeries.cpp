@@ -1,6 +1,37 @@
 #include "FourierSeries.hpp"
-FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_width, const int &t_height)
-  : m_width(t_width), m_height(t_height) {
+
+FourierSeries::FourierSeries(const std::string &path, const int &t_width, const int &t_height)
+ : m_width(t_width), m_height(t_height){
+  // create series
+  std::vector<float> x_path, y_path; // x & y coordinates
+
+  // build arr of x vals and y vals seperately
+  std::ifstream source ("source.txt"); // a list of points
+  SDL_Event e;
+  bool quit {false};
+
+  // store data found in source
+  int size {};
+  if (source.is_open()) {
+    int i{};
+    std::string line;
+    while (std::getline(source, line)) {
+      int start = line.find(':') + 2;
+      int end = line.find(',');
+      std::string x = line.substr(start, end - start);
+      start = end + 2;
+      end = line.length() - 1;
+      std::string y = line.substr(start, end - start);
+      x_path.emplace_back(std::stof(x));
+      y_path.emplace_back(std::stof(y));
+      i++;
+    }
+    size = i; // number of points in source
+  } else {
+    std::cout << "could not open source.txt" << std::endl;
+    quit = true;
+  }
+
   // break down path coordinates into vectors (dft)
   // one 'fourier system' for each axis
   if (x_path.size() != y_path.size()) {
@@ -41,7 +72,10 @@ FourierSeries::FourierSeries(const std::vector<float> &x_path, const std::vector
   }
 }
 
-void FourierSeries::draw(SDL_Renderer* renderer) {
+void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
+  SDL_SetRenderTarget(renderer, tex);
+  SDL_SetRenderDrawColor(renderer, m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
+  SDL_RenderClear(renderer);
   // vectors that draw x values
   SDL_FPoint x_point {static_cast<float>(m_width) / 2.0f, 50}, y_point {50, static_cast<float>(m_height) * 0.66f};
   SDL_FPoint prev_x, prev_y;
@@ -68,12 +102,17 @@ void FourierSeries::draw(SDL_Renderer* renderer) {
   }
 
   // update last coordinate
-  m_result = {x_point.x, y_point.y};
+  SDL_FPoint result_point {x_point.x, y_point.y};
+  m_result.emplace_back(result_point);
 
   // draw a line from the system to the result
   SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
-  SDL_RenderDrawLine(renderer, m_result.x, x_point.y, m_result.x, m_result.y);
-  SDL_RenderDrawLine(renderer, y_point.x, m_result.y, m_result.x, m_result.y);
+  SDL_RenderDrawLine(renderer, result_point.x, x_point.y, result_point.x, result_point.y);
+  SDL_RenderDrawLine(renderer, y_point.x, result_point.y, result_point.x, result_point.y);
+
+  // draw result
+  SDL_RenderDrawLinesF(renderer, m_result.data(), m_result.size());
+  SDL_SetRenderTarget(renderer, nullptr);
 }
 
 void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius, const float &phase) {
@@ -91,14 +130,13 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, co
   SDL_RenderDrawLinesF(renderer, points.data(), points.size());
 }
 
-// get tail of x & y axis
-SDL_FPoint FourierSeries::getPoint() {
-  return m_result;
-}
-
 // returns 0 when the series repeats
 float FourierSeries::getTime() {
   return m_time;
+}
+
+void FourierSeries::clearResult() {
+  m_result.clear();
 }
 
 // move vectors to next position
