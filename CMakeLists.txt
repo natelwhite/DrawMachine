@@ -28,6 +28,7 @@ set(
   SOURCES
   ${PROJECT_SOURCE_DIR}/src/main.cpp
   ${PROJECT_SOURCE_DIR}/include/FourierSeries.cpp
+  ${PROJECT_SOURCE_DIR}/include/App.cpp
 
   # link imgui
   ${IMGUI_DIRS}/imgui.cpp
