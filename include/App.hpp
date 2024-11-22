@@ -11,6 +11,10 @@
 #include <string>
 #include <fstream>
 
+struct SeriesInterface {
+  bool play;
+};
+
 class App
 {
   public:
@@ -21,14 +25,18 @@ class App
     void show(); // show imgui widgets
     bool m_running = true;
 
-    const int WIDTH {1200};
-    const int HEIGHT {900};
+    const ImVec2 APP_SIZE {1200.0f, 900.0f};
+    const ImVec2 INTERFACE_SIZE {APP_SIZE.x, 64.0f};
+    const ImVec2 FOURIER_SIZE {APP_SIZE.x, APP_SIZE.y - INTERFACE_SIZE.y};
+    /*const int WIDTH {1200};*/
+    /*const int HEIGHT {900};*/
     const std::string DATA_PATH {"source.txt"};
     const SDL_Color CLEAR_COLOR {51, 51, 51, 255};
     const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
     const SDL_Color LINE_COLOR { 30, 200, 30, 255 };
 
-    FourierSeries m_series {DATA_PATH, WIDTH, HEIGHT};
+    FourierSeries m_series {DATA_PATH, static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
+    SeriesInterface m_series_interface {false};
     SDL_Texture* m_series_display;
     ImGuiIO m_io;
     SDL_Renderer *m_renderer;

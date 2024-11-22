@@ -18,7 +18,7 @@ App::App() {
 
   // create window
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-  m_window = SDL_CreateWindow("Palettable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280, 720, window_flags);
+  m_window = SDL_CreateWindow("Palettable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, APP_SIZE.x, APP_SIZE.y, window_flags);
   if (m_window == nullptr) {
     printf("Error: SDL_CreateWindow0(): %s\n", SDL_GetError());
   }
@@ -29,7 +29,7 @@ App::App() {
     SDL_Log("Error creating SDL_Renderer!");
   }
 
-  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, WIDTH, HEIGHT);
+  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, FOURIER_SIZE.x, FOURIER_SIZE.y);
   // setup dear imgui context
   IMGUI_CHECKVERSION();
   ImGuiContext* context = ImGui::CreateContext();
@@ -74,8 +74,6 @@ int App::run() {
     ImGui::NewFrame();
 
     // show app window
-    m_series.update();
-    m_series.draw(m_renderer, m_series_display);
     this->show();
 
     ImGui::EndFrame();
@@ -110,14 +108,45 @@ void App::show() {
   ImGui::SetNextWindowViewport(viewport->ID);
   
   if (ImGui::Begin("Fourier Series", &m_running, m_app_window_flags)) {
-    // calculate window positions and sizes
-    ImVec2 app_size = ImGui::GetWindowSize();
+    ImGuiWindowFlags inputs_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+    ImGui::SetNextWindowSize(INTERFACE_SIZE);
+    ImGui::SetNextWindowPos({0.0f, APP_SIZE.y - INTERFACE_SIZE.y});
+    if (ImGui::Begin("interface", &m_running, inputs_window_flags)) {
 
+      // if stopped, show play button, show stop button otherwise
+      if (!m_series_interface.play) {
+        if (ImGui::Button("Play")) {
+          m_series_interface.play = true;
+        }
+      } else {
+        if (ImGui::Button("Stop")) {
+          m_series_interface.play = false;
+        }
+      }
+
+      if (ImGui::Button("Clear")) {
+        m_series.clearResult();
+      }
+
+      ImGui::End();
+    }
+
+    ImGuiWindowFlags fourier_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+    ImGui::SetNextWindowSize(FOURIER_SIZE);
+    ImGui::SetNextWindowPos({0.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
+    if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
+      ImGui::PopStyleVar();
+      if (m_series_interface.play) {
+        m_series.update();
+      }
+      m_series.draw(m_renderer, m_series_display);
+      int width, height;
+      SDL_QueryTexture(m_series_display, nullptr, nullptr, &width, &height);
+      ImGui::Image((ImTextureID)(intptr_t)m_series_display, ImVec2(static_cast<float>(width), static_cast<float>(height)));
+      ImGui::End();
+    }
     //  draw sdl2 texture as dear imgui image
-    int width, height;
-    SDL_QueryTexture(m_series_display, nullptr, nullptr, &width, &height);
-    ImGui::Image((ImTextureID)(intptr_t)m_series_display, ImVec2(static_cast<float>(width), static_cast<float>(height)));
     ImGui::End();
   }
 }
-

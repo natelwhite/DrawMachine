@@ -21,9 +21,8 @@ struct Circle {
 
 class FourierSeries {
   public:
-    /*FourierSeries(const std::vector<float> &x_path, const std::vector<float> &y_path, const int &t_width, const int &t_height);*/
     FourierSeries(const std::string &path, const int &t_width, const int &t_height);
-    void draw(SDL_Renderer*, SDL_Texture*);
+    void draw(SDL_Renderer* renderer, SDL_Texture* tex);
     void update();
     float getTime();
     void clearResult();

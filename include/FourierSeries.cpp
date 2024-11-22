@@ -111,7 +111,7 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_RenderDrawLine(renderer, y_point.x, result_point.y, result_point.x, result_point.y);
 
   // draw result
-  SDL_RenderDrawLinesF(renderer, m_result.data(), m_result.size());
+  SDL_RenderDrawPointsF(renderer, m_result.data(), m_result.size());
   SDL_SetRenderTarget(renderer, nullptr);
 }
 
