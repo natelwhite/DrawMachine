@@ -40,8 +40,6 @@ set(
   ${IMGUI_BACKEND_DIRS}/imgui_impl_sdlrenderer2.cpp
 )
 
-# put executable in project root
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_executable(${PROJECT_NAME} ${SOURCES})
 
 target_link_libraries(
