@@ -48,7 +48,7 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
     for (int j = 0; j < m_frames; j++) {
       const double phase {tau * i * j / m_frames};
 
-      auto sum = [phase](const Complex prev, const double target) -> Complex {
+      auto sum = [phase](const Complex &prev, const double &target) -> Complex {
         Complex result {prev.re + target * cos(phase), prev.im - target * sin(phase)};
         return result;
       };
@@ -57,7 +57,7 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
     }
 
     // average a sum that is a complex number
-    auto average = [](const Complex sum, const int length) -> Complex {
+    auto average = [](const Complex &sum, const int &length) -> Complex {
       Complex result {sum.re / length, sum.im / length};
       return result;
     };
@@ -65,7 +65,7 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
     y_axis = average(y_axis, m_frames);
 
     // turn period & complexnum into Frequency
-    auto newFrequency = [](const double period, const Complex val) -> Frequency {
+    auto newFrequency = [](const double &period, const Complex &val) -> Frequency {
       const double amplitude {sqrt(val.re * val.re + val.im * val.im)}; // pythagorean theorem
       const double phase {atan2(val.im, val.re)}; // initial rotation angle
       const Frequency result {period, amplitude, phase};

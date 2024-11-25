@@ -20,16 +20,19 @@ App::App() {
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
   m_window = SDL_CreateWindow("Palettable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, APP_SIZE.x, APP_SIZE.y, window_flags);
   if (m_window == nullptr) {
-    printf("Error: SDL_CreateWindow0(): %s\n", SDL_GetError());
+    printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
   }
 
   // create render backend
   m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
   if (m_renderer == nullptr) {
-    SDL_Log("Error creating SDL_Renderer!");
+    printf("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
   }
 
   m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, APP_SIZE.x, APP_SIZE.y);
+  if (m_series_display == nullptr) {
+    printf("Error: SDL_CreateTexture(): %s\n", SDL_GetError());
+  }
   // setup dear imgui context
   IMGUI_CHECKVERSION();
   ImGuiContext* context = ImGui::CreateContext();
@@ -118,8 +121,6 @@ void App::show() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
     if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
       ImGui::PopStyleVar();
-      // dynamically resize sdl2 texture
-      float series_size = fourier_size.x < fourier_size.y ? fourier_size.x : fourier_size.y;
       SDL_Rect src;
       SDL_QueryTexture(m_series_display, nullptr, nullptr, &src.w, &src.h);
       if (m_interface.play) {
@@ -137,31 +138,26 @@ void App::show() {
     ImGui::SetNextWindowPos({0.0f, viewport_size.y - interface_size.y});
     if (ImGui::Begin("interface", &m_running, interface_flags)) {
 
-      if (ImGui::ColorEdit4("Background Color", &m_interface.background_color.x)) {
-        const SDL_Color color {
-          static_cast<Uint8>(m_interface.background_color.x * 255.0f),
-          static_cast<Uint8>(m_interface.background_color.y * 255.0f),
-          static_cast<Uint8>(m_interface.background_color.z * 255.0f),
-          static_cast<Uint8>(m_interface.background_color.w * 255.0f)
+      // convert from ImVec4 to SDL_Color
+      const auto toSDL_Color = [](const ImVec4 &imgui_color) -> SDL_Color {
+        const SDL_Color result {
+          static_cast<Uint8>(imgui_color.x * 255.0f),
+          static_cast<Uint8>(imgui_color.y * 255.0f),
+          static_cast<Uint8>(imgui_color.z * 255.0f),
+          static_cast<Uint8>(imgui_color.w * 255.0f)
         };
+        return result;
+      };
+      if (ImGui::ColorEdit4("Background Color", &m_interface.background_color.x)) {
+        SDL_Color color = toSDL_Color(m_interface.background_color);
         m_series.setBackgroundColor(color);
       }
       if (ImGui::ColorEdit4("Line Color", &m_interface.line_color.x)) {
-        const SDL_Color color {
-          static_cast<Uint8>(m_interface.line_color.x * 255.0f),
-          static_cast<Uint8>(m_interface.line_color.y * 255.0f),
-          static_cast<Uint8>(m_interface.line_color.z * 255.0f),
-          static_cast<Uint8>(m_interface.line_color.w * 255.0f)
-        };
+        SDL_Color color = toSDL_Color(m_interface.line_color);
         m_series.setLineColor(color);
       }
       if (ImGui::ColorEdit4("Polygon Color", &m_interface.polygon_color.x)) {
-        const SDL_Color color {
-          static_cast<Uint8>(m_interface.polygon_color.x * 255.0f),
-          static_cast<Uint8>(m_interface.polygon_color.y * 255.0f),
-          static_cast<Uint8>(m_interface.polygon_color.z * 255.0f),
-          static_cast<Uint8>(m_interface.polygon_color.w * 255.0f)
-        };
+        SDL_Color color = toSDL_Color(m_interface.polygon_color);
         m_series.setPolygonColor(color);
       }
 
