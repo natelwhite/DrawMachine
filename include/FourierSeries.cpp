@@ -3,15 +3,12 @@
 FourierSeries::FourierSeries(const std::string &path, const int &t_width, const int &t_height)
  : m_width(t_width), m_height(t_height){
   // create series
-  std::vector<float> x_path, y_path; // x & y coordinates
+  std::vector<double> x_path, y_path; // x & y coordinates
 
   // build arr of x vals and y vals seperately
   std::ifstream source ("source.txt"); // a list of points
-  SDL_Event e;
-  bool quit {false};
 
   // store data found in source
-  int size {};
   if (source.is_open()) {
     int i{};
     std::string line;
@@ -22,14 +19,12 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
       start = end + 2;
       end = line.length() - 1;
       std::string y = line.substr(start, end - start);
-      x_path.emplace_back(std::stof(x));
-      y_path.emplace_back(std::stof(y));
+      x_path.emplace_back(std::stod(x));
+      y_path.emplace_back(std::stod(y));
       i++;
     }
-    size = i; // number of points in source
   } else {
     std::cout << "could not open source.txt" << std::endl;
-    quit = true;
   }
 
   // break down path coordinates into vectors (dft)
@@ -39,36 +34,46 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
     return;
   }
 
-  m_size = x_path.size();
-  m_xCircles.resize(m_size);
-  m_yCircles.resize(m_size);
+  // allocate memory
+  m_frames = x_path.size();
+  m_xCircles.resize(m_frames);
+  m_yCircles.resize(m_frames);
 
-  for (int i = 0; i < m_size; i++) {
-    double xRe{}, xIm{}; // real, imaginary | complex num | represents coordinate point
-    double yRe{}, yIm{};
-    double tau {2 * M_PI}; // circumfrence to radius ratio
-
+  // dft algorithm
+  for (int i = 0; i < m_frames; i++) {
+    const double tau {2 * M_PI}; // necessary constant
+    Complex x_axis, y_axis; // the complex numbers to be calculated
     // discrete integral over x values to get coordinate points on complex plane
-    for (int j = 0; j < m_size; j++) {
-      const double phi {tau * i * j / m_size}; // phase
-      xRe += x_path.at(j) * cos(phi); // real x value      | terminal x val of vector
-      xIm -= x_path.at(j) * sin(phi); // imaginary y value | terminal y val of vector
-      yRe += y_path.at(j) * cos(phi);
-      yIm -= y_path.at(j) * sin(phi);
-    }
-    xRe /= m_size; // average out all values
-    xIm /= m_size;
-    yRe /= m_size;
-    yIm /= m_size;
-    m_xCircles.at(i).frequency = i; // num of rotations per unit time
-    m_xCircles.at(i).amplitude = sqrt(xRe * xRe + xIm * xIm); // a^2 + b^2 = c^2 | c^2 = length/amplitude of circle
-    // ^ this is also the radius of the circle formed around the circle
-    m_xCircles.at(i).phase = atan2(xIm, xRe); // starting rotation for circle
+    // using lambdas for readability
+    for (int j = 0; j < m_frames; j++) {
+      const double phase {tau * i * j / m_frames};
 
-    m_yCircles.at(i).frequency = i;
-    m_yCircles.at(i).amplitude = sqrt(yRe * yRe + yIm * yIm);
-    m_yCircles.at(i).phase = atan2(yIm, yRe);
-    m_yCircles.at(i).phase -= M_PI / 2; // turn yVectors 90 deg
+      auto sum = [phase](const Complex prev, const double target) -> Complex {
+        Complex result {prev.re + target * cos(phase), prev.im - target * sin(phase)};
+        return result;
+      };
+      x_axis = sum(x_axis, x_path.at(j));
+      y_axis = sum(y_axis, y_path.at(j));
+    }
+
+    // average a sum that is a complex number
+    auto average = [](const Complex sum, const int length) -> Complex {
+      Complex result {sum.re / length, sum.im / length};
+      return result;
+    };
+    x_axis = average(x_axis, m_frames);
+    y_axis = average(y_axis, m_frames);
+
+    // turn period & complexnum into Frequency
+    auto newFrequency = [](const double period, const Complex val) -> Frequency {
+      const double amplitude {sqrt(val.re * val.re + val.im * val.im)}; // pythagorean theorem
+      const double phase {atan2(val.im, val.re)}; // initial rotation angle
+      const Frequency result {period, amplitude, phase};
+      return result;
+    };
+    m_xCircles.at(i) = newFrequency(i, x_axis);
+    m_yCircles.at(i) = newFrequency(i, y_axis);
+    m_yCircles.at(i).phase -= M_PI / 2.0f; // turn yVectors 90 deg
   }
 }
 
@@ -77,9 +82,9 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderDrawColor(renderer, m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
   SDL_RenderClear(renderer);
   // vectors that draw x values
-  SDL_FPoint x_point {static_cast<float>(m_width) / 2.0f, 50}, y_point {50, static_cast<float>(m_height) * 0.66f};
+  SDL_FPoint x_point {static_cast<float>(m_width) * 0.2f, 50}, y_point {50, static_cast<float>(m_height) * 0.8f};
   SDL_FPoint prev_x, prev_y;
-  for (int i{}; i < m_size; i++) {
+  for (int i{}; i < m_frames; i++) {
     SDL_FPoint next_x = m_xCircles.at(i).getPoint(m_time);
     prev_x = x_point;
     x_point.x += next_x.x;
@@ -97,8 +102,8 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
 
     // draw circle
     SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
-    drawCircle(renderer, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
-    drawCircle(renderer, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
+    drawPolygon(renderer, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
+    drawPolygon(renderer, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
   }
 
   // update last coordinate
@@ -115,7 +120,7 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderTarget(renderer, nullptr);
 }
 
-void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius, const float &phase) {
+void FourierSeries::drawPolygon(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius, const float &phase) {
   // calculate coordinate of tangent points along the circumfrence
   std::vector<SDL_FPoint> points;
   for (double i{}; i < 2 * M_PI; i += 2 * M_PI / 3.0f) {
@@ -130,9 +135,16 @@ void FourierSeries::drawCircle(SDL_Renderer* renderer, const SDL_FPoint &pos, co
   SDL_RenderDrawLinesF(renderer, points.data(), points.size());
 }
 
-// returns 0 when the series repeats
-float FourierSeries::getTime() {
-  return m_time;
+int FourierSeries::getFrame() {
+  return static_cast<int>(m_time / (2 * M_PI) * m_frames);
+}
+
+int FourierSeries::getFrames() {
+  return m_frames;
+}
+
+void FourierSeries::setFrame(const int &frame) {
+  m_time = (2 * M_PI / m_frames) * frame;
 }
 
 void FourierSeries::clearResult() {
@@ -141,7 +153,7 @@ void FourierSeries::clearResult() {
 
 // move vectors to next position
 void FourierSeries::update() {
-  (m_time <= 2 * M_PI) ? (m_time += 2 * M_PI / m_size) : (m_time = 0);
+  (m_time <= 2 * M_PI) ? (m_time += 2 * M_PI / m_frames) : (m_time = 0);
 }
 
 void FourierSeries::setCircleColor(const SDL_Color &color) {
