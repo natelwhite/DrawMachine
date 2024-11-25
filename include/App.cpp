@@ -10,7 +10,6 @@ App::App() {
     printf("Error: %s\n", SDL_GetError());
   }
 
-
   // enable native IME
 #ifdef SDL_HINT_IME_SHOW_UI
   SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
@@ -128,6 +127,15 @@ void App::show() {
         m_series.clearResult();
       }
 
+      if (m_series_interface.play) {
+        m_series.update();
+        m_series_interface.frame = m_series.getFrame();
+        ImGui::SliderInt("Time", &m_series_interface.frame, 0, m_series.getFrames());
+      } else {
+        ImGui::SliderInt("Time", &m_series_interface.frame, 0, m_series.getFrames());
+        m_series.setFrame(m_series_interface.frame);
+      }
+
       ImGui::End();
     }
 
@@ -137,9 +145,7 @@ void App::show() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
     if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
       ImGui::PopStyleVar();
-      if (m_series_interface.play) {
-        m_series.update();
-      }
+
       m_series.draw(m_renderer, m_series_display);
       int width, height;
       SDL_QueryTexture(m_series_display, nullptr, nullptr, &width, &height);

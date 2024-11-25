@@ -13,6 +13,7 @@
 
 struct SeriesInterface {
   bool play;
+  int frame;
 };
 
 class App
@@ -25,11 +26,11 @@ class App
     void show(); // show imgui widgets
     bool m_running = true;
 
-    const ImVec2 APP_SIZE {1200.0f, 900.0f};
-    const ImVec2 INTERFACE_SIZE {APP_SIZE.x, 64.0f};
+    // window sizes
+    const ImVec2 APP_SIZE {900.0f, 900.0f};
+    const ImVec2 INTERFACE_SIZE {APP_SIZE.x, 96.0f};
     const ImVec2 FOURIER_SIZE {APP_SIZE.x, APP_SIZE.y - INTERFACE_SIZE.y};
-    /*const int WIDTH {1200};*/
-    /*const int HEIGHT {900};*/
+
     const std::string DATA_PATH {"source.txt"};
     const SDL_Color CLEAR_COLOR {51, 51, 51, 255};
     const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
