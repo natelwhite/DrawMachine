@@ -11,9 +11,14 @@
 #include <string>
 #include <fstream>
 
-struct SeriesInterface {
-  bool play;
-  int frame;
+struct InterfaceData {
+  bool play {true};
+  int frame {0};
+  int x_sides {3};
+  int y_sides {3};
+  ImVec4 background_color {0.2f, 0.2f, 0.2f, 1.0f};
+  ImVec4 line_color {0.78f, 0.12f, 0.12f, 1.0f};
+  ImVec4 polygon_color {0.12f, 0.78, 0.12f, 1.0f};
 };
 
 class App
@@ -28,16 +33,14 @@ class App
 
     // window sizes
     const ImVec2 APP_SIZE {900.0f, 900.0f};
-    const ImVec2 INTERFACE_SIZE {APP_SIZE.x, 96.0f};
-    const ImVec2 FOURIER_SIZE {APP_SIZE.x, APP_SIZE.y - INTERFACE_SIZE.y};
 
     const std::string DATA_PATH {"source.txt"};
     const SDL_Color CLEAR_COLOR {51, 51, 51, 255};
     const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
     const SDL_Color LINE_COLOR { 30, 200, 30, 255 };
 
-    FourierSeries m_series {DATA_PATH, static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
-    SeriesInterface m_series_interface {false};
+    FourierSeries m_series {DATA_PATH, 800, 800};
+    InterfaceData m_interface;
     SDL_Texture* m_series_display;
     ImGuiIO m_io;
     SDL_Renderer *m_renderer;
@@ -45,8 +48,5 @@ class App
 
     // window flags
     const static ImGuiWindowFlags m_app_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBackground;
-
-    const static ImGuiWindowFlags m_tools_window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
-
 };
 

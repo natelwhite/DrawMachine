@@ -79,7 +79,7 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
 
 void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderTarget(renderer, tex);
-  SDL_SetRenderDrawColor(renderer, m_backgroundColor.r, m_backgroundColor.g, m_backgroundColor.b, m_backgroundColor.a);
+  SDL_SetRenderDrawColor(renderer, m_background_color.r, m_background_color.g, m_background_color.b, m_background_color.a);
   SDL_RenderClear(renderer);
   // vectors that draw x values
   SDL_FPoint x_point {static_cast<float>(m_width) * 0.2f, 50}, y_point {50, static_cast<float>(m_height) * 0.8f};
@@ -96,14 +96,14 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
     y_point.y += next_y.y;
 
     // draw a line from one circle to the next
-    SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
+    SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
     SDL_RenderDrawLineF(renderer, prev_x.x, prev_x.y, x_point.x, x_point.y);
     SDL_RenderDrawLineF(renderer, prev_y.x, prev_y.y, y_point.x, y_point.y);
 
     // draw circle
-    SDL_SetRenderDrawColor(renderer, m_circleColor.r, m_circleColor.g, m_circleColor.b, m_circleColor.a);
-    drawPolygon(renderer, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
-    drawPolygon(renderer, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
+    SDL_SetRenderDrawColor(renderer, m_polygon_color.r, m_polygon_color.g, m_polygon_color.b, m_polygon_color.a);
+    drawPolygon(renderer, m_x_sides, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
+    drawPolygon(renderer, m_y_sides, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
   }
 
   // update last coordinate
@@ -111,7 +111,7 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   m_result.emplace_back(result_point);
 
   // draw a line from the system to the result
-  SDL_SetRenderDrawColor(renderer, m_lineColor.r, m_lineColor.g, m_lineColor.b, m_lineColor.a);
+  SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
   SDL_RenderDrawLine(renderer, result_point.x, x_point.y, result_point.x, result_point.y);
   SDL_RenderDrawLine(renderer, y_point.x, result_point.y, result_point.x, result_point.y);
 
@@ -120,10 +120,10 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderTarget(renderer, nullptr);
 }
 
-void FourierSeries::drawPolygon(SDL_Renderer* renderer, const SDL_FPoint &pos, const float &radius, const float &phase) {
+void FourierSeries::drawPolygon(SDL_Renderer* renderer, const int &sides, const SDL_FPoint &pos, const float &radius, const float &phase) {
   // calculate coordinate of tangent points along the circumfrence
   std::vector<SDL_FPoint> points;
-  for (double i{}; i < 2 * M_PI; i += 2 * M_PI / 3.0f) {
+  for (double i{}; i < 2 * M_PI; i += 2 * M_PI / static_cast<double>(sides)) {
     SDL_FPoint point = {
       static_cast<float>(cos(i + phase)) * radius + pos.x,
       static_cast<float>(sin(i + phase)) * radius + pos.y
@@ -147,6 +147,11 @@ void FourierSeries::setFrame(const int &frame) {
   m_time = (2 * M_PI / m_frames) * frame;
 }
 
+void FourierSeries::setSides(const int &x_sides, const int &y_sides) {
+  m_x_sides = x_sides;
+  m_y_sides = y_sides;
+}
+
 void FourierSeries::clearResult() {
   m_result.clear();
 }
@@ -156,10 +161,14 @@ void FourierSeries::update() {
   (m_time <= 2 * M_PI) ? (m_time += 2 * M_PI / m_frames) : (m_time = 0);
 }
 
-void FourierSeries::setCircleColor(const SDL_Color &color) {
-  m_circleColor = color;
+void FourierSeries::setBackgroundColor(const SDL_Color &color) {
+  m_background_color = color;
+}
+
+void FourierSeries::setPolygonColor(const SDL_Color &color) {
+  m_polygon_color = color;
 }
 
 void FourierSeries::setLineColor(const SDL_Color &color) { 
-  m_lineColor = color;
+  m_line_color = color;
 }

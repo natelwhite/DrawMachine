@@ -3,7 +3,8 @@
 
 App::App() {
   m_series.setLineColor(LINE_COLOR);
-  m_series.setCircleColor(CIRCLE_COLOR);
+  m_series.setPolygonColor(CIRCLE_COLOR);
+  m_series.setSides(m_interface.x_sides, m_interface.y_sides);
 
   // init SDL2 systems
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -28,7 +29,7 @@ App::App() {
     SDL_Log("Error creating SDL_Renderer!");
   }
 
-  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, FOURIER_SIZE.x, FOURIER_SIZE.y);
+  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, APP_SIZE.x, APP_SIZE.y);
   // setup dear imgui context
   IMGUI_CHECKVERSION();
   ImGuiContext* context = ImGui::CreateContext();
@@ -94,6 +95,7 @@ App::~App() {
   ImGui_ImplSDL2_Shutdown();
   ImGui::DestroyContext();
 
+  SDL_DestroyTexture(m_series_display);
   SDL_DestroyRenderer(m_renderer);
   SDL_DestroyWindow(m_window);
   SDL_Quit();
@@ -102,24 +104,75 @@ App::~App() {
 void App::show() {
   // make window fill viewport
   ImGuiViewport* viewport = ImGui::GetMainViewport();
+  ImVec2 viewport_size = {viewport->Size};
   ImGui::SetNextWindowPos(viewport->Pos);
-  ImGui::SetNextWindowSize(viewport->Size);
+  ImGui::SetNextWindowSize(viewport_size);
   ImGui::SetNextWindowViewport(viewport->ID);
   
   if (ImGui::Begin("Fourier Series", &m_running, m_app_window_flags)) {
-    ImGuiWindowFlags inputs_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-    ImGui::SetNextWindowSize(INTERFACE_SIZE);
-    ImGui::SetNextWindowPos({0.0f, APP_SIZE.y - INTERFACE_SIZE.y});
-    if (ImGui::Begin("interface", &m_running, inputs_window_flags)) {
+    //  draw sdl2 texture as dear imgui image
+    ImGuiWindowFlags fourier_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+    ImVec2 fourier_size {viewport_size.x, viewport_size.y - 256.0f};
+    ImGui::SetNextWindowSize(fourier_size);
+    ImGui::SetNextWindowPos({0.0f, 0.0f});
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
+    if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
+      ImGui::PopStyleVar();
+      // dynamically resize sdl2 texture
+      float series_size = fourier_size.x < fourier_size.y ? fourier_size.x : fourier_size.y;
+      SDL_Rect src;
+      SDL_QueryTexture(m_series_display, nullptr, nullptr, &src.w, &src.h);
+      if (m_interface.play) {
+        m_series.update();
+      }
+      m_series.draw(m_renderer, m_series_display);
+      ImGui::Image((ImTextureID)(intptr_t)m_series_display, ImVec2(src.w, src.h));
+      ImGui::End();
+    }
+
+    // create buttons and sliders for manipulating the series render
+    ImGuiWindowFlags interface_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
+    ImVec2 interface_size {viewport_size.x, 256.0f};
+    ImGui::SetNextWindowSize(interface_size);
+    ImGui::SetNextWindowPos({0.0f, viewport_size.y - interface_size.y});
+    if (ImGui::Begin("interface", &m_running, interface_flags)) {
+
+      if (ImGui::ColorEdit4("Background Color", &m_interface.background_color.x)) {
+        const SDL_Color color {
+          static_cast<Uint8>(m_interface.background_color.x * 255.0f),
+          static_cast<Uint8>(m_interface.background_color.y * 255.0f),
+          static_cast<Uint8>(m_interface.background_color.z * 255.0f),
+          static_cast<Uint8>(m_interface.background_color.w * 255.0f)
+        };
+        m_series.setBackgroundColor(color);
+      }
+      if (ImGui::ColorEdit4("Line Color", &m_interface.line_color.x)) {
+        const SDL_Color color {
+          static_cast<Uint8>(m_interface.line_color.x * 255.0f),
+          static_cast<Uint8>(m_interface.line_color.y * 255.0f),
+          static_cast<Uint8>(m_interface.line_color.z * 255.0f),
+          static_cast<Uint8>(m_interface.line_color.w * 255.0f)
+        };
+        m_series.setLineColor(color);
+      }
+      if (ImGui::ColorEdit4("Polygon Color", &m_interface.polygon_color.x)) {
+        const SDL_Color color {
+          static_cast<Uint8>(m_interface.polygon_color.x * 255.0f),
+          static_cast<Uint8>(m_interface.polygon_color.y * 255.0f),
+          static_cast<Uint8>(m_interface.polygon_color.z * 255.0f),
+          static_cast<Uint8>(m_interface.polygon_color.w * 255.0f)
+        };
+        m_series.setPolygonColor(color);
+      }
 
       // if stopped, show play button, show stop button otherwise
-      if (!m_series_interface.play) {
+      if (!m_interface.play) {
         if (ImGui::Button("Play")) {
-          m_series_interface.play = true;
+          m_interface.play = true;
         }
       } else {
         if (ImGui::Button("Stop")) {
-          m_series_interface.play = false;
+          m_interface.play = false;
         }
       }
 
@@ -127,32 +180,25 @@ void App::show() {
         m_series.clearResult();
       }
 
-      if (m_series_interface.play) {
-        m_series.update();
-        m_series_interface.frame = m_series.getFrame();
-        ImGui::SliderInt("Time", &m_series_interface.frame, 0, m_series.getFrames());
+      if (m_interface.play) {
+        m_interface.frame = m_series.getFrame();
+        ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames());
       } else {
-        ImGui::SliderInt("Time", &m_series_interface.frame, 0, m_series.getFrames());
-        m_series.setFrame(m_series_interface.frame);
+        if (ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames())) {
+          m_series.setFrame(m_interface.frame);
+        }
+      }
+
+      if (ImGui::SliderInt("X Axis Sides", &m_interface.x_sides, 3, 32)) {
+        m_series.setSides(m_interface.x_sides, m_interface.y_sides);
+      }
+      if (ImGui::SliderInt("Y Axis Sides", &m_interface.y_sides, 3, 32)) {
+        m_series.setSides(m_interface.x_sides, m_interface.y_sides);
       }
 
       ImGui::End();
     }
 
-    ImGuiWindowFlags fourier_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-    ImGui::SetNextWindowSize(FOURIER_SIZE);
-    ImGui::SetNextWindowPos({0.0f, 0.0f});
-    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
-    if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
-      ImGui::PopStyleVar();
-
-      m_series.draw(m_renderer, m_series_display);
-      int width, height;
-      SDL_QueryTexture(m_series_display, nullptr, nullptr, &width, &height);
-      ImGui::Image((ImTextureID)(intptr_t)m_series_display, ImVec2(static_cast<float>(width), static_cast<float>(height)));
-      ImGui::End();
-    }
-    //  draw sdl2 texture as dear imgui image
     ImGui::End();
   }
 }
