@@ -3,7 +3,7 @@
 - Then, while in ./FourierSeries/, run
   - cmake -B build
   - cmake --build build
-- The FourierSeries executable should now be in the project root.
+- The FourierSeries executable should now be in ./FourierSeries/build/.
 - I use linux, so I'm not 100% sure this works for Windows. If there are any issues, make sure cmake knows what kind of environment you're using, such as Mingw.
 
 ### Language server
