@@ -22,9 +22,9 @@ struct Frequency {
   }
 };
 
-class FourierSeries {
+class Machine {
   public:
-    FourierSeries(const std::string &path, const int &t_width, const int &t_height);
+    Machine(const std::string &path, const int &t_width, const int &t_height);
     void draw(SDL_Renderer* renderer, SDL_Texture* tex); // draw series to sdl texture
     void update(); // advance one frame
 

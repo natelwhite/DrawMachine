@@ -1,6 +1,6 @@
-#include "FourierSeries.hpp"
+#include "Machine.hpp"
 
-FourierSeries::FourierSeries(const std::string &path, const int &t_width, const int &t_height)
+Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
  : m_width(t_width), m_height(t_height){
   // create series
   std::vector<double> x_path, y_path; // x & y coordinates
@@ -77,7 +77,7 @@ FourierSeries::FourierSeries(const std::string &path, const int &t_width, const 
   }
 }
 
-void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
+void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderTarget(renderer, tex);
   SDL_SetRenderDrawColor(renderer, m_background_color.r, m_background_color.g, m_background_color.b, m_background_color.a);
   SDL_RenderClear(renderer);
@@ -120,7 +120,7 @@ void FourierSeries::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderTarget(renderer, nullptr);
 }
 
-void FourierSeries::drawPolygon(SDL_Renderer* renderer, const int &sides, const SDL_FPoint &pos, const float &radius, const float &phase) {
+void Machine::drawPolygon(SDL_Renderer* renderer, const int &sides, const SDL_FPoint &pos, const float &radius, const float &phase) {
   // calculate coordinate of tangent points along the circumfrence
   std::vector<SDL_FPoint> points;
   for (double i{}; i < 2 * M_PI; i += 2 * M_PI / static_cast<double>(sides)) {
@@ -135,40 +135,40 @@ void FourierSeries::drawPolygon(SDL_Renderer* renderer, const int &sides, const 
   SDL_RenderDrawLinesF(renderer, points.data(), points.size());
 }
 
-int FourierSeries::getFrame() {
+int Machine::getFrame() {
   return static_cast<int>(m_time / (2 * M_PI) * m_frames);
 }
 
-int FourierSeries::getFrames() {
+int Machine::getFrames() {
   return m_frames;
 }
 
-void FourierSeries::setFrame(const int &frame) {
+void Machine::setFrame(const int &frame) {
   m_time = (2 * M_PI / m_frames) * frame;
 }
 
-void FourierSeries::setSides(const int &x_sides, const int &y_sides) {
+void Machine::setSides(const int &x_sides, const int &y_sides) {
   m_x_sides = x_sides;
   m_y_sides = y_sides;
 }
 
-void FourierSeries::clearResult() {
+void Machine::clearResult() {
   m_result.clear();
 }
 
 // move vectors to next position
-void FourierSeries::update() {
+void Machine::update() {
   (m_time <= 2 * M_PI) ? (m_time += 2 * M_PI / m_frames) : (m_time = 0);
 }
 
-void FourierSeries::setBackgroundColor(const SDL_Color &color) {
+void Machine::setBackgroundColor(const SDL_Color &color) {
   m_background_color = color;
 }
 
-void FourierSeries::setPolygonColor(const SDL_Color &color) {
+void Machine::setPolygonColor(const SDL_Color &color) {
   m_polygon_color = color;
 }
 
-void FourierSeries::setLineColor(const SDL_Color &color) { 
+void Machine::setLineColor(const SDL_Color &color) { 
   m_line_color = color;
 }

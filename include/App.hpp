@@ -39,7 +39,7 @@ class App
     const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
     const SDL_Color LINE_COLOR { 30, 200, 30, 255 };
 
-    FourierSeries m_series {DATA_PATH, 800, 800};
+    Machine m_series {DATA_PATH, 800, 800};
     InterfaceData m_interface;
     SDL_Texture* m_series_display;
     ImGuiIO m_io;
