@@ -1,5 +1,5 @@
 #pragma once
-#include "FourierSeries.hpp"
+#include "Machine.hpp"
 
 #include <vector>
 
