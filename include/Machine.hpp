@@ -2,10 +2,9 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
-#include <fstream>
 #include <SDL2/SDL.h>
 #include <vector>
-#include <iostream>
+#include <string>
 
 struct Complex {
   double re, im;

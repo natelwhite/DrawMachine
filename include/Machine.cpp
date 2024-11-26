@@ -1,4 +1,6 @@
 #include "Machine.hpp"
+#include <fstream>
+#include <iostream>
 
 Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
  : m_width(t_width), m_height(t_height){

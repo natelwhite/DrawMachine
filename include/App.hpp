@@ -1,15 +1,8 @@
 #pragma once
 #include "Machine.hpp"
-
-#include <vector>
-
 #include <SDL2/SDL.h>
 #include "imgui.h"
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_sdlrenderer2.h"
-
 #include <string>
-#include <fstream>
 
 struct InterfaceData {
   bool play {true};

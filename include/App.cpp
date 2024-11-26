@@ -1,5 +1,6 @@
 #include "App.hpp"
-#include <iostream>
+#include "imgui_impl_sdl2.h"
+#include "imgui_impl_sdlrenderer2.h"
 
 App::App() {
   m_series.setLineColor(LINE_COLOR);
@@ -18,7 +19,7 @@ App::App() {
 
   // create window
   SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-  m_window = SDL_CreateWindow("Palettable", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, APP_SIZE.x, APP_SIZE.y, window_flags);
+  m_window = SDL_CreateWindow("Draw Machine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, APP_SIZE.x, APP_SIZE.y, window_flags);
   if (m_window == nullptr) {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
   }
