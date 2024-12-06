@@ -27,10 +27,9 @@ Machine::Machine(const std::string &path, const int &t_width, const int &t_heigh
     }
   } else {
     std::cout << "could not open source.txt" << std::endl;
+    return;
   }
 
-  // break down path coordinates into vectors (dft)
-  // one 'fourier system' for each axis
   if (x_path.size() != y_path.size()) {
     std::cout << "Paths must be exactly the same size" << std::endl;
     return;
@@ -38,10 +37,9 @@ Machine::Machine(const std::string &path, const int &t_width, const int &t_heigh
 
   // allocate memory
   m_frames = x_path.size();
-  m_xCircles.resize(m_frames);
-  m_yCircles.resize(m_frames);
+  m_series.resize(m_frames * 2); // two dimensional
 
-  // dft algorithm
+  // break down path coordinates into vectors (dft)
   for (int i = 0; i < m_frames; i++) {
     const double tau {2 * M_PI}; // necessary constant
     Complex x_axis, y_axis; // the complex numbers to be calculated
@@ -73,9 +71,11 @@ Machine::Machine(const std::string &path, const int &t_width, const int &t_heigh
       const Frequency result {period, amplitude, phase};
       return result;
     };
-    m_xCircles.at(i) = newFrequency(i, x_axis);
-    m_yCircles.at(i) = newFrequency(i, y_axis);
-    m_yCircles.at(i).phase -= M_PI / 2.0f; // turn yVectors 90 deg
+    Frequency x = newFrequency(i, x_axis);
+    Frequency y = newFrequency(i, y_axis);
+    y.phase -= M_PI * 0.5f;
+    m_series.emplace_back(x);
+    m_series.emplace_back(y);
   }
 }
 
@@ -84,40 +84,30 @@ void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
   SDL_SetRenderDrawColor(renderer, m_background_color.r, m_background_color.g, m_background_color.b, m_background_color.a);
   SDL_RenderClear(renderer);
   // vectors that draw x values
-  SDL_FPoint x_point {static_cast<float>(m_width) * 0.2f, 50}, y_point {50, static_cast<float>(m_height) * 0.8f};
   SDL_FPoint prev_x, prev_y;
-  for (int i{}; i < m_frames; i++) {
-    SDL_FPoint next_x = m_xCircles.at(i).getPoint(m_time);
-    prev_x = x_point;
-    x_point.x += next_x.x;
-    x_point.y += next_x.y;
-
-    SDL_FPoint next_y = m_yCircles.at(i).getPoint(m_time);
-    prev_y = y_point;
-    y_point.x += next_y.x;
-    y_point.y += next_y.y;
+  SDL_FPoint current {static_cast<float>(m_width) * 0.2f, static_cast<float>(m_height) * 0.5f};
+  SDL_FPoint prev {current};
+  for (int i{}; i < m_series.size(); i++) {
+    SDL_FPoint next = m_series.at(i).getPoint(m_time);
+    prev = current;
+    current.x += next.x;
+    current.y += next.y;
 
     // draw a line from one circle to the next
     SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
-    SDL_RenderDrawLineF(renderer, prev_x.x, prev_x.y, x_point.x, x_point.y);
-    SDL_RenderDrawLineF(renderer, prev_y.x, prev_y.y, y_point.x, y_point.y);
+    SDL_RenderDrawLineF(renderer, prev.x, prev.y, current.x, current.y);
 
-    // draw circle
+    // draw frequency
     SDL_SetRenderDrawColor(renderer, m_polygon_color.r, m_polygon_color.g, m_polygon_color.b, m_polygon_color.a);
-    drawPolygon(renderer, m_x_sides, prev_x, m_xCircles.at(i).amplitude, m_xCircles.at(i).phase);
-    drawPolygon(renderer, m_y_sides, prev_y, m_yCircles.at(i).amplitude, m_yCircles.at(i).phase);
+    drawPolygon(renderer, m_sides, prev, m_series.at(i).amplitude, m_series.at(i).phase);
   }
 
   // update last coordinate
-  SDL_FPoint result_point {x_point.x, y_point.y};
-  m_result.emplace_back(result_point);
-
-  // draw a line from the system to the result
-  SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
-  SDL_RenderDrawLine(renderer, result_point.x, x_point.y, result_point.x, result_point.y);
-  SDL_RenderDrawLine(renderer, y_point.x, result_point.y, result_point.x, result_point.y);
+  SDL_FPoint result_point = current;
+  m_result.emplace_back(current);
 
   // draw result
+  SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
   SDL_RenderDrawPointsF(renderer, m_result.data(), m_result.size());
   SDL_SetRenderTarget(renderer, nullptr);
 }
@@ -149,9 +139,8 @@ void Machine::setFrame(const int &frame) {
   m_time = (2 * M_PI / m_frames) * frame;
 }
 
-void Machine::setSides(const int &x_sides, const int &y_sides) {
-  m_x_sides = x_sides;
-  m_y_sides = y_sides;
+void Machine::setSides(const int &sides) {
+  m_sides = sides;
 }
 
 void Machine::clearResult() {

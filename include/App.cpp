@@ -3,9 +3,19 @@
 #include "imgui_impl_sdlrenderer2.h"
 
 App::App() {
-  m_series.setLineColor(LINE_COLOR);
-  m_series.setPolygonColor(CIRCLE_COLOR);
-  m_series.setSides(m_interface.x_sides, m_interface.y_sides);
+  const auto toSDL_Color = [](const ImVec4 &imgui_color) -> SDL_Color {
+    const SDL_Color result {
+      static_cast<Uint8>(imgui_color.x * 255.0f),
+      static_cast<Uint8>(imgui_color.y * 255.0f),
+      static_cast<Uint8>(imgui_color.z * 255.0f),
+      static_cast<Uint8>(imgui_color.w * 255.0f)
+    };
+    return result;
+  };
+  m_series.setLineColor(toSDL_Color(m_interface.line_color));
+  m_series.setBackgroundColor(toSDL_Color(m_interface.background_color));
+  m_series.setPolygonColor(toSDL_Color(m_interface.polygon_color));
+  m_series.setSides(m_interface.sides);
 
   // init SDL2 systems
   if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
@@ -30,7 +40,7 @@ App::App() {
     printf("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
   }
 
-  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, APP_SIZE.x, APP_SIZE.y);
+  m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, FOURIER_SIZE.x, FOURIER_SIZE.y);
   if (m_series_display == nullptr) {
     printf("Error: SDL_CreateTexture(): %s\n", SDL_GetError());
   }
@@ -85,7 +95,7 @@ int App::run() {
     // Rendering
     ImGui::Render();
     SDL_RenderSetScale(m_renderer, m_io.DisplayFramebufferScale.x, m_io.DisplayFramebufferScale.y);
-    SDL_SetRenderDrawColor(m_renderer, CLEAR_COLOR.r, CLEAR_COLOR.g, CLEAR_COLOR.b, CLEAR_COLOR.a);
+    SDL_SetRenderDrawColor(m_renderer, m_interface.background_color.x, m_interface.background_color.y, m_interface.background_color.z, m_interface.background_color.w);
     SDL_RenderClear(m_renderer);
     ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer);
     SDL_RenderPresent(m_renderer);
@@ -186,11 +196,8 @@ void App::show() {
         }
       }
 
-      if (ImGui::SliderInt("X Axis Sides", &m_interface.x_sides, 3, 32)) {
-        m_series.setSides(m_interface.x_sides, m_interface.y_sides);
-      }
-      if (ImGui::SliderInt("Y Axis Sides", &m_interface.y_sides, 3, 32)) {
-        m_series.setSides(m_interface.x_sides, m_interface.y_sides);
+      if (ImGui::SliderInt("Frequency Sides", &m_interface.sides, 3, 32)) {
+        m_series.setSides(m_interface.sides);
       }
 
       ImGui::End();

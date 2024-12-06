@@ -7,8 +7,7 @@
 struct InterfaceData {
   bool play {true};
   int frame {0};
-  int x_sides {3};
-  int y_sides {3};
+  int sides {12};
   ImVec4 background_color {0.2f, 0.2f, 0.2f, 1.0f};
   ImVec4 line_color {0.78f, 0.12f, 0.12f, 1.0f};
   ImVec4 polygon_color {0.12f, 0.78, 0.12f, 1.0f};
@@ -24,15 +23,12 @@ class App
     void show(); // show imgui widgets
     bool m_running = true;
 
-    // window sizes
+    // window size
     const ImVec2 APP_SIZE {900.0f, 900.0f};
-
+    const ImVec2 FOURIER_SIZE {1280.0f, 720.0f};
     const std::string DATA_PATH {"source.txt"};
-    const SDL_Color CLEAR_COLOR {51, 51, 51, 255};
-    const SDL_Color CIRCLE_COLOR { 200, 30, 30, 255 };
-    const SDL_Color LINE_COLOR { 30, 200, 30, 255 };
 
-    Machine m_series {DATA_PATH, 800, 800};
+    Machine m_series {DATA_PATH, static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
     InterfaceData m_interface;
     SDL_Texture* m_series_display;
     ImGuiIO m_io;
