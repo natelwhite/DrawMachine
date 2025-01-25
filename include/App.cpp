@@ -22,6 +22,9 @@ App::App() {
     printf("Error: %s\n", SDL_GetError());
   }
 
+  // smooth lines
+  /*SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");*/
+
   // enable native IME
 #ifdef SDL_HINT_IME_SHOW_UI
   SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
@@ -189,9 +192,9 @@ void App::show() {
 
       if (m_interface.play) {
         m_interface.frame = m_series.getFrame();
-        ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames());
+        ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames()-1);
       } else {
-        if (ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames())) {
+        if (ImGui::SliderInt("Time", &m_interface.frame, 0, m_series.getFrames()-1)) {
           m_series.setFrame(m_interface.frame);
         }
       }

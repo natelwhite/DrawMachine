@@ -108,7 +108,7 @@ void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
 
   // draw result
   SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
-  SDL_RenderDrawPointsF(renderer, m_result.data(), m_result.size());
+  SDL_RenderDrawLinesF(renderer, m_result.data(), m_result.size());
   SDL_SetRenderTarget(renderer, nullptr);
 }
 

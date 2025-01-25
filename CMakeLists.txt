@@ -10,12 +10,12 @@ find_package(SDL2 REQUIRED)
 
 set(
   IMGUI_DIRS
-  ${PROJECT_SOURCE_DIR}/build/vendor/imgui
+  ${PROJECT_SOURCE_DIR}/vendor/imgui
 )
 
 set(
   IMGUI_BACKEND_DIRS
-  ${PROJECT_SOURCE_DIR}/build/vendor/imgui/backends
+  ${PROJECT_SOURCE_DIR}/vendor/imgui/backends
 )
 
 include_directories(
@@ -24,6 +24,14 @@ include_directories(
   ${IMGUI_DIRS}
   ${IMGUI_BACKEND_DIRS}
   ${SDL2_INCLUDE_DIRS}
+)
+
+file(
+  GLOB SOURCES
+  ${PROJECT_SOURCE_DIR}/src/main.cpp
+  ${PROJECT_SOURCE_DIR}/include/*.cpp
+  ${IMGUI_DIRS}/*.cpp
+  ${IMGUI_BACKEND_DIRS}/*.cpp
 )
 
 set(
