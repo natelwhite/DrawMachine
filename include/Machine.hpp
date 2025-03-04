@@ -2,7 +2,7 @@
 #define _USE_MATH_DEFINES
 
 #include <cmath>
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <vector>
 #include <string>
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "Machine.hpp"
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include "imgui.h"
 #include <string>
 
