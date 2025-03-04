@@ -1,6 +1,5 @@
 #include "Machine.hpp"
 #include <fstream>
-#include <iostream>
 
 Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
  : m_width(t_width), m_height(t_height){
@@ -26,12 +25,12 @@ Machine::Machine(const std::string &path, const int &t_width, const int &t_heigh
       i++;
     }
   } else {
-    std::cout << "could not open source.txt" << std::endl;
+	printf("Could not open source.txt");
     return;
   }
 
   if (x_path.size() != y_path.size()) {
-    std::cout << "Paths must be exactly the same size" << std::endl;
+	printf("Paths must be exaclty the same size");
     return;
   }
 
