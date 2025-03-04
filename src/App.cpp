@@ -1,6 +1,8 @@
 #include "App.hpp"
-#include "imgui_impl_sdl2.h"
-#include "imgui_impl_sdlrenderer2.h"
+#include "SDL3/SDL_render.h"
+#include "SDL3/SDL_video.h"
+#include "imgui_impl_sdl3.h"
+#include "imgui_impl_sdlrenderer3.h"
 
 App::App() {
   const auto toSDL_Color = [](const ImVec4 &imgui_color) -> SDL_Color {
@@ -18,7 +20,7 @@ App::App() {
   m_series.setSides(m_interface.sides);
 
   // init SDL2 systems
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0) {
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
     printf("Error: %s\n", SDL_GetError());
   }
 
@@ -31,14 +33,14 @@ App::App() {
 #endif
 
   // create window
-  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-  m_window = SDL_CreateWindow("Draw Machine", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, APP_SIZE.x, APP_SIZE.y, window_flags);
+  SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+  m_window = SDL_CreateWindow("Draw Machine", APP_SIZE.x, APP_SIZE.y, window_flags);
   if (m_window == nullptr) {
     printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
   }
 
   // create render backend
-  m_renderer = SDL_CreateRenderer(m_window, -1, SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED);
+  m_renderer = SDL_CreateRenderer(m_window, "vulkan");
   if (m_renderer == nullptr) {
     printf("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
   }
@@ -53,8 +55,8 @@ App::App() {
   ImGui::SetCurrentContext(context);
 
   // link imgui to sdl2
-  ImGui_ImplSDL2_InitForSDLRenderer(m_window, m_renderer);
-  ImGui_ImplSDLRenderer2_Init(m_renderer);
+  ImGui_ImplSDL3_InitForSDLRenderer(m_window, m_renderer);
+  ImGui_ImplSDLRenderer3_Init(m_renderer);
 
   // setup io
   m_io = ImGui::GetIO(); (void)m_io;
@@ -71,13 +73,13 @@ int App::run() {
   SDL_Event event;
   while (m_running) {
     while (SDL_PollEvent(&event)) {
-      ImGui_ImplSDL2_ProcessEvent(&event);
+      ImGui_ImplSDL3_ProcessEvent(&event);
       switch(event.type) {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
           m_running = false;
           break;
-        case SDL_KEYDOWN:
-          switch (event.key.keysym.sym) {
+        case SDL_EVENT_KEY_DOWN:
+          switch (event.key.key) {
             case SDLK_ESCAPE:
               m_running = false;
               break;
@@ -86,8 +88,8 @@ int App::run() {
     }
 
     // start dear imgui frame
-    ImGui_ImplSDLRenderer2_NewFrame();
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDLRenderer3_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     ImGui::NewFrame();
 
     // show app window
@@ -97,10 +99,10 @@ int App::run() {
 
     // Rendering
     ImGui::Render();
-    SDL_RenderSetScale(m_renderer, m_io.DisplayFramebufferScale.x, m_io.DisplayFramebufferScale.y);
+    SDL_SetRenderScale(m_renderer, m_io.DisplayFramebufferScale.x, m_io.DisplayFramebufferScale.y);
     SDL_SetRenderDrawColor(m_renderer, m_interface.background_color.x, m_interface.background_color.y, m_interface.background_color.z, m_interface.background_color.w);
     SDL_RenderClear(m_renderer);
-    ImGui_ImplSDLRenderer2_RenderDrawData(ImGui::GetDrawData(), m_renderer);
+    ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), m_renderer);
     SDL_RenderPresent(m_renderer);
   }
   return 0;
@@ -108,8 +110,8 @@ int App::run() {
 
 App::~App() {
   // cleanup
-  ImGui_ImplSDLRenderer2_Shutdown();
-  ImGui_ImplSDL2_Shutdown();
+  ImGui_ImplSDLRenderer3_Shutdown();
+  ImGui_ImplSDL3_Shutdown();
   ImGui::DestroyContext();
 
   SDL_DestroyTexture(m_series_display);
@@ -135,8 +137,8 @@ void App::show() {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
     if (ImGui::Begin("fourier", &m_running, fourier_window_flags)) {
       ImGui::PopStyleVar();
-      SDL_Rect src;
-      SDL_QueryTexture(m_series_display, nullptr, nullptr, &src.w, &src.h);
+      SDL_FRect src;
+	  SDL_GetTextureSize(m_series_display, &src.w, &src.h);
       if (m_interface.play) {
         m_series.update();
       }
