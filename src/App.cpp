@@ -38,7 +38,7 @@ App::App() {
   }
 
   // create render backend
-  m_renderer = SDL_CreateRenderer(m_window, "vulkan");
+  m_renderer = SDL_CreateRenderer(m_window, NULL);
   if (m_renderer == nullptr) {
     printf("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
   }
