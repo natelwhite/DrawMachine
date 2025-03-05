@@ -13,5 +13,5 @@ file(
 	imgui/backends/imgui_impl_sdlrenderer3.cpp
 )
 
-target_include_directories(${CMAKE_PROJECT_NAME} PUBLIC imgui imgui/backends)
-target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${SOURCES})
+target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE imgui imgui/backends)
+target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${SOURCES})
