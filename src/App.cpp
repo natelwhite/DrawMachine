@@ -60,7 +60,6 @@ App::App() {
   m_io = ImGui::GetIO(); (void)m_io;
   m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
   m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-  m_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   // setup dear imgui style
   ImGui::StyleColorsDark();
@@ -124,7 +123,6 @@ void App::show() {
   ImVec2 viewport_size = {viewport->Size};
   ImGui::SetNextWindowPos(viewport->Pos);
   ImGui::SetNextWindowSize(viewport_size);
-  ImGui::SetNextWindowViewport(viewport->ID);
   
   if (ImGui::Begin("Fourier Series", &m_running, m_app_window_flags)) {
     //  draw sdl2 texture as dear imgui image
