@@ -22,16 +22,8 @@ App::App() {
 		printf("Error: %s\n", SDL_GetError());
 	}
 
-	// smooth lines
-	/*SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");*/
-
-	// enable native IME
-#ifdef SDL_HINT_IME_SHOW_UI
-	SDL_SetHint(SDL_HINT_IME_SHOW_UI, "1");
-#endif
-
 	// create window
-	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	m_window = SDL_CreateWindow("Draw Machine", APP_SIZE.x, APP_SIZE.y, window_flags);
 	if (m_window == nullptr) {
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());

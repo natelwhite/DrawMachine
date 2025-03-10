@@ -24,10 +24,9 @@ class App {
 
 		// window size
 		const ImVec2 APP_SIZE {900.0f, 900.0f};
-		const ImVec2 FOURIER_SIZE {1280.0f, 720.0f};
-		const std::string DATA_PATH {"source.txt"};
+		const ImVec2 FOURIER_SIZE {900.0f, 900.0f};
 
-		Machine m_series {DATA_PATH, static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
+		Machine m_series {SDL_GetBasePath(), "source.txt", static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
 		InterfaceData m_interface;
 		SDL_Texture* m_series_display;
 		ImGuiIO m_io;

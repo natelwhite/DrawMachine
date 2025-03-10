@@ -1,13 +1,13 @@
 #include "Machine.hpp"
 #include <fstream>
 
-Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
+Machine::Machine(const std::string &path, const std::string &filename, const int &t_width, const int &t_height)
 	 : m_width(t_width), m_height(t_height) {
 	// create series
 	std::vector<double> x_path, y_path; // x & y coordinates
 
 	// build arr of x vals and y vals seperately
-	std::ifstream source ("source.txt"); // a list of points
+	std::ifstream source (path + '/' + filename); // a list of points
 
 	// store data found in source
 	if (source.is_open()) {
