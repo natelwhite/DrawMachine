@@ -1,7 +1,3 @@
-/DrawMachine
-/Makefile
-/cmake_install.cmake
 /compile_commands.json
-/build
+/bin
 .cache
-imgui.ini
