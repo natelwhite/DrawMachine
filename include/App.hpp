@@ -23,10 +23,10 @@ class App {
 		bool m_running = true;
 
 		// window size
-		const ImVec2 APP_SIZE {900.0f, 900.0f};
-		const ImVec2 FOURIER_SIZE {900.0f, 900.0f};
+		const ImVec2 APP_SIZE {1920.0f, 1080.0f};
+		const ImVec2 INTERFACE_SIZE {1920.0f, 256.0f};
 
-		Machine m_series {"data/source.txt", static_cast<int>(FOURIER_SIZE.x), static_cast<int>(FOURIER_SIZE.y)};
+		Machine m_series {"data/source.txt"};
 		InterfaceData m_interface;
 		SDL_Texture* m_series_display;
 		ImGuiIO m_io;

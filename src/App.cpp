@@ -28,10 +28,10 @@ App::App() {
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	SDL_CreateWindowAndRenderer("Draw Machine", APP_SIZE.x, APP_SIZE.y, window_flags, &m_window, &m_renderer);
 	if (m_window == nullptr || m_renderer == nullptr) {
-		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
+		printf("Error: SDL_CreateWindowAndRenderer(): %s\n", SDL_GetError());
 	}
 
-	m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, FOURIER_SIZE.x, FOURIER_SIZE.y);
+	m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, APP_SIZE.x, APP_SIZE.y - 256.0f);
 	if (m_series_display == nullptr) {
 		printf("Error: SDL_CreateTexture(): %s\n", SDL_GetError());
 	}
@@ -47,7 +47,6 @@ App::App() {
 	// setup io
 	m_io = ImGui::GetIO(); (void)m_io;
 	m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	m_io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
 	// setup dear imgui style
 	ImGui::StyleColorsDark();
@@ -69,6 +68,10 @@ int App::run() {
 					m_running = false;
 					break;
 				}
+				break;
+			case SDL_EVENT_WINDOW_RESIZED:
+				SDL_DestroyTexture(m_series_display);
+				m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, event.window.data1, event.window.data2 - 256.0f);
 				break;
 			}
 		}
@@ -116,7 +119,7 @@ void App::show() {
 	if (ImGui::Begin("Fourier Series", &m_running, m_app_window_flags)) {
 		//  draw sdl2 texture as dear imgui image
 		ImGuiWindowFlags fourier_window_flags = ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove;
-		ImVec2 fourier_size {viewport_size.x, viewport_size.y - 256.0f};
+		ImVec2 fourier_size {viewport_size.x, viewport_size.y - INTERFACE_SIZE.y};
 		ImGui::SetNextWindowSize(fourier_size);
 		ImGui::SetNextWindowPos({0.0f, 0.0f});
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, {0.0f, 0.0f}); // remove window padding
@@ -127,7 +130,7 @@ void App::show() {
 			if (m_interface.play) {
 				m_series.update();
 			}
-			m_series.draw(m_renderer, m_series_display);
+			m_series.draw(m_renderer, m_series_display, viewport_size.x, viewport_size.y - INTERFACE_SIZE.y);
 			ImGui::Image((ImTextureID)(intptr_t)m_series_display, ImVec2(src.w, src.h));
 			ImGui::End();
 		}

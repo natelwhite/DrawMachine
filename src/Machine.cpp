@@ -1,8 +1,7 @@
 #include "Machine.hpp"
 #include <fstream>
 
-Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
-	 : m_width(t_width), m_height(t_height) {
+Machine::Machine(const std::string &path) {
 	dft(path);
 }
 
@@ -84,13 +83,13 @@ void Machine::dft(const std::string &path) {
 	}
 }
 
-void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
+void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex, const int &width, const int &height) {
 	SDL_SetRenderTarget(renderer, tex);
 	SDL_SetRenderDrawColor(renderer, m_background_color.r, m_background_color.g, m_background_color.b, m_background_color.a);
 	SDL_RenderClear(renderer);
 	// vectors that draw x values
 	SDL_FPoint prev_x, prev_y;
-	SDL_FPoint current {static_cast<float>(m_width) * 0.2f, static_cast<float>(m_height) * 0.5f};
+	SDL_FPoint current {static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f};
 	SDL_FPoint prev {current};
 	for (int i{}; i < m_series.size(); i++) {
 		SDL_FPoint next = m_series.at(i).getPoint(m_time);

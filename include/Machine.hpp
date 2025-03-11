@@ -23,8 +23,8 @@ struct Frequency {
 
 class Machine {
   public:
-    Machine(const std::string &path, const int &t_width, const int &t_height);
-    void draw(SDL_Renderer* renderer, SDL_Texture* tex); // draw series to sdl texture
+    Machine(const std::string &path);
+    void draw(SDL_Renderer* renderer, SDL_Texture* tex, const int &width, const int &height); // draw series to sdl texture
     void update(); // advance one frame
 
     int getFrames(); // the number of frames in the animation
@@ -42,7 +42,6 @@ class Machine {
     std::vector<Frequency> m_series;
     std::vector<SDL_FPoint> m_result;
     int m_frames;
-    int m_width, m_height;
     int m_sides {12}; // number of sides to display for each frequency
     SDL_Color m_polygon_color {255, 255, 255, 255}, m_line_color {255, 0, 0, 255}, m_background_color {0, 0, 0, 255};
     float m_time { };
