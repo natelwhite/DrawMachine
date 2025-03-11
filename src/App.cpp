@@ -26,15 +26,9 @@ App::App() {
 
 	// create window
 	SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_HIGH_PIXEL_DENSITY);
-	m_window = SDL_CreateWindow("Draw Machine", APP_SIZE.x, APP_SIZE.y, window_flags);
-	if (m_window == nullptr) {
+	SDL_CreateWindowAndRenderer("Draw Machine", APP_SIZE.x, APP_SIZE.y, window_flags, &m_window, &m_renderer);
+	if (m_window == nullptr || m_renderer == nullptr) {
 		printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
-	}
-
-	// create render backend
-	m_renderer = SDL_CreateRenderer(m_window, NULL);
-	if (m_renderer == nullptr) {
-		printf("Error: SDL_CreateRenderer(): %s\n", SDL_GetError());
 	}
 
 	m_series_display = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, FOURIER_SIZE.x, FOURIER_SIZE.y);
@@ -211,8 +205,8 @@ void App::show() {
 				m_series.setSides(m_interface.sides);
 			}
 
-				ImGui::End();
-			}
+			ImGui::End();
+		}
 
 		ImGui::End();
 	}
