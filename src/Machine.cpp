@@ -9,19 +9,17 @@ Machine::Machine(const std::string &path, const int &t_width, const int &t_heigh
 void Machine::setData(const std::string &path) {
 	dft(path);
 	setFrame(0);
+	clearResult();
 }
 
 void Machine::dft(const std::string &path) {
-	printf("Path: %s%s\n", SDL_GetBasePath(), path.data());
-	// create series
-	std::vector<double> x_path, y_path; // x & y coordinates
+	std::vector<SDL_FPoint> coordinates;
 
 	// build arr of x vals and y vals seperately
 	std::ifstream source (SDL_GetBasePath() + path); // a list of points
 
 	// store data found in source
 	if (source.is_open()) {
-		int i{};
 		std::string line;
 		while (std::getline(source, line)) {
 			int start = line.find(':') + 2;
@@ -30,24 +28,17 @@ void Machine::dft(const std::string &path) {
 			start = end + 2;
 			end = line.length() - 1;
 			std::string y = line.substr(start, end - start);
-			x_path.push_back(std::stod(x));
-			y_path.push_back(std::stod(y));
-			i++;
+			SDL_FPoint point { std::stof(x), std::stof(y) };
+			coordinates.push_back(point);
 		}
 	} else {
 		printf("Could not open source.txt");
 		return;
 	}
 
-	if (x_path.size() != y_path.size()) {
-		printf("Paths must be exaclty the same size");
-		return;
-	}
-
 	// handle memory
+	m_frames = coordinates.size();
 	m_series.clear();
-	m_result.resize(0);
-	m_frames = x_path.size();
 	m_series.resize(m_frames * 2); // two dimensional
 
 	// break down path coordinates into vectors (dft)
@@ -64,8 +55,8 @@ void Machine::dft(const std::string &path) {
 				Complex result {prev.re + target * cos(phase), prev.im - target * sin(phase)};
 				return result;
 			};
-			x_axis = sum(x_axis, x_path.at(j));
-			y_axis = sum(y_axis, y_path.at(j));
+			x_axis = sum(x_axis, coordinates.at(j).x);
+			y_axis = sum(y_axis, coordinates.at(j).y);
 		}
 
 		// average a sum that is a complex number
@@ -134,10 +125,10 @@ void Machine::drawPolygon(SDL_Renderer* renderer, const int &sides, const SDL_FP
 		static_cast<float>(cos(i + phase)) * radius + pos.x,
 		static_cast<float>(sin(i + phase)) * radius + pos.y
 	};
-	points.emplace_back(point);
+	points.push_back(point);
 	}
 	// duplicate first point to the end of the list to complete shape
-	points.emplace_back(points.at(0));
+	points.push_back(points.at(0));
 	SDL_RenderLines(renderer, points.data(), points.size());
 }
 
