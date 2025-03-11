@@ -1,6 +1,8 @@
 #include "App.hpp"
+#include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlrenderer3.h"
+#include <filesystem>
 
 App::App() {
 	const auto toSDL_Color = [](const ImVec4 &imgui_color) -> SDL_Color {
@@ -142,6 +144,21 @@ void App::show() {
 		ImGui::SetNextWindowSize(interface_size);
 		ImGui::SetNextWindowPos({0.0f, viewport_size.y - interface_size.y});
 		if (ImGui::Begin("interface", &m_running, interface_flags)) {
+			if (ImGui::Button("Set Path")) {
+				ImGui::OpenPopup("Set Path");
+			}
+			ImGui::SetNextWindowPos({0.0f, viewport_size.y - interface_size.y});
+			if (ImGui::BeginPopup("Set Path")) {
+				std::filesystem::path dir { "data" };
+				for (const std::filesystem::directory_entry &entry : std::filesystem::directory_iterator {dir}) {
+					const std::string entry_str { entry.path().string() };
+					const std::string button_name { entry_str.substr(entry_str.rfind('/'), entry_str.length()) };
+					if (ImGui::Button(button_name.data())) {
+						m_series.setData(entry_str);
+					}
+				}
+				ImGui::End();
+			}
 
 			// convert from ImVec4 to SDL_Color
 			const auto toSDL_Color = [](const ImVec4 &imgui_color) -> SDL_Color {

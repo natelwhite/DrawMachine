@@ -1,13 +1,23 @@
 #include "Machine.hpp"
 #include <fstream>
 
-Machine::Machine(const std::string &path, const std::string &filename, const int &t_width, const int &t_height)
+Machine::Machine(const std::string &path, const int &t_width, const int &t_height)
 	 : m_width(t_width), m_height(t_height) {
+	dft(path);
+}
+
+void Machine::setData(const std::string &path) {
+	dft(path);
+	setFrame(0);
+}
+
+void Machine::dft(const std::string &path) {
+	printf("Path: %s%s\n", SDL_GetBasePath(), path.data());
 	// create series
 	std::vector<double> x_path, y_path; // x & y coordinates
 
 	// build arr of x vals and y vals seperately
-	std::ifstream source (path + '/' + filename); // a list of points
+	std::ifstream source (SDL_GetBasePath() + path); // a list of points
 
 	// store data found in source
 	if (source.is_open()) {
@@ -20,8 +30,8 @@ Machine::Machine(const std::string &path, const std::string &filename, const int
 			start = end + 2;
 			end = line.length() - 1;
 			std::string y = line.substr(start, end - start);
-			x_path.emplace_back(std::stod(x));
-			y_path.emplace_back(std::stod(y));
+			x_path.push_back(std::stod(x));
+			y_path.push_back(std::stod(y));
 			i++;
 		}
 	} else {
@@ -34,11 +44,14 @@ Machine::Machine(const std::string &path, const std::string &filename, const int
 		return;
 	}
 
-	// allocate memory
+	// handle memory
+	m_series.clear();
+	m_result.resize(0);
 	m_frames = x_path.size();
 	m_series.resize(m_frames * 2); // two dimensional
 
 	// break down path coordinates into vectors (dft)
+	int freq_count { };
 	for (int i = 0; i < m_frames; i++) {
 		const double tau {2 * M_PI}; // necessary constant
 		Complex x_axis, y_axis; // the complex numbers to be calculated
@@ -71,10 +84,12 @@ Machine::Machine(const std::string &path, const std::string &filename, const int
 			return result;
 		};
 		Frequency x = newFrequency(i, x_axis);
+		m_series.at(freq_count) = x;
+		++freq_count;
 		Frequency y = newFrequency(i, y_axis);
 		y.phase -= M_PI * 0.5f;
-		m_series.emplace_back(x);
-		m_series.emplace_back(y);
+		m_series.at(freq_count) = y;
+		++freq_count;
 	}
 }
 
@@ -103,7 +118,7 @@ void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex) {
 
 	// update last coordinate
 	SDL_FPoint result_point = current;
-	m_result.emplace_back(current);
+	m_result.push_back(current);
 
 	// draw result
 	SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
