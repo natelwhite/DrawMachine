@@ -1,9 +1,9 @@
 set(SDL_TEST_LIBRARY OFF)
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS ON)
 add_subdirectory(SDL)
 
 add_library(vendor INTERFACE)
-target_link_libraries(vendor INTERFACE SDL3::SDL3-static)
+target_link_libraries(vendor INTERFACE SDL3::SDL3)
 
 # include dear imgui using sdl3 renderer backend
 file(
