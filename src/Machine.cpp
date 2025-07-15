@@ -90,24 +90,21 @@ void Machine::draw(SDL_Renderer* renderer, SDL_Texture* tex, const int &width, c
 	// vectors that draw x values
 	SDL_FPoint prev_x, prev_y;
 	SDL_FPoint current {static_cast<float>(width) * 0.5f, static_cast<float>(height) * 0.5f};
-	SDL_FPoint prev {current};
+	std::vector<SDL_FPoint> polygon_lines(m_series.size());
 	for (int i{}; i < m_series.size(); i++) {
 		SDL_FPoint next = m_series.at(i).getPoint(m_time);
-		prev = current;
+		polygon_lines.at(i) = {current.x, current.y};
 		current.x += next.x;
 		current.y += next.y;
 
-		// draw a line from one circle to the next
-		SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
-		SDL_RenderLine(renderer, prev.x, prev.y, current.x, current.y);
-
 		// draw frequency
 		SDL_SetRenderDrawColor(renderer, m_polygon_color.r, m_polygon_color.g, m_polygon_color.b, m_polygon_color.a);
-		drawPolygon(renderer, m_sides, prev, m_series.at(i).amplitude, m_series.at(i).phase);
+		drawPolygon(renderer, m_sides, current, m_series.at(i).amplitude, m_series.at(i).phase);
 	}
+	SDL_SetRenderDrawColor(renderer, m_line_color.r, m_line_color.g, m_line_color.b, m_line_color.a);
+	SDL_RenderLines(renderer, polygon_lines.data(), polygon_lines.size());
 
 	// update last coordinate
-	SDL_FPoint result_point = current;
 	m_result.push_back(current);
 
 	// draw result

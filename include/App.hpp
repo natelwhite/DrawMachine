@@ -8,9 +8,9 @@ struct InterfaceData {
 	bool play {true};
 	int frame {0};
 	int sides {12};
-	ImVec4 background_color {0.2f, 0.2f, 0.2f, 1.0f};
-	ImVec4 line_color {0.78f, 0.12f, 0.12f, 1.0f};
-	ImVec4 polygon_color {0.12f, 0.78, 0.12f, 1.0f};
+	ImVec4 background_color {0.0f, 0.0f, 0.0f, 1.0f}; // black
+	ImVec4 line_color {1.0f, 1.0f, 1.0f, 1.0f}; // white
+	ImVec4 polygon_color {1.0f, 1.0f, 1.0f, 0.5f}; // semi-transparent white
 };
 
 class App {
